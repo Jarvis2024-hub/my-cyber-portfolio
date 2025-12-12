@@ -180,6 +180,10 @@ const Portfolio = () => {
   const [loadingSkill, setLoadingSkill] = useState('');
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
+  // NEW: Contact Form State
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
   // Parallax Effect
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -284,6 +288,38 @@ const Portfolio = () => {
     const tip = await callGemini(prompt);
     setActiveSkillTip({ skill: skillName, tip });
     setLoadingSkill('');
+  };
+
+  // NEW: Handle Contact Form Submission (AJAX to avoid redirect)
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmittingForm(true);
+
+    const formData = new FormData(e.target);
+
+    try {
+        // Use the AJAX endpoint of FormSubmit to prevent redirection
+        const response = await fetch("https://formsubmit.co/ajax/elangovan.cybersec@gmail.com", {
+            method: "POST",
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            setIsFormSubmitted(true);
+            e.target.reset();
+            setContactMessage('');
+        } else {
+             throw new Error('Form submission failed');
+        }
+    } catch (error) {
+        console.error("Form error:", error);
+        alert("Something went wrong. Please try again or email directly.");
+    } finally {
+        setIsSubmittingForm(false);
+    }
   };
 
   // --- RENDER ---
@@ -432,7 +468,7 @@ const Portfolio = () => {
                   <div className="flex gap-6 mt-6">
                      {[
                        { icon: Github, href: "https://github.com/Jarvis2024-hub" },
-                       { icon: Linkedin, href: "https://linkedin.com/in/elangovan4641477" },
+                       { icon: Linkedin, href: "https://www.linkedin.com/in/elangovan4641477/" },
                        { icon: Mail, href: `mailto:${RESUME_DATA.email}` }
                      ].map((social, i) => (
                        <a key={i} href={social.href} target="_blank" rel="noreferrer" className="text-[#C7D3DD] hover:text-[#00E3C2] transition-all hover:-translate-y-1 p-2 bg-[#1A2634] rounded-sm hover:bg-[#081F2F]">
@@ -494,7 +530,7 @@ const Portfolio = () => {
             <div className="flex flex-col lg:flex-row gap-16 items-start">
               <div className="w-full lg:max-w-4xl">
                 <Reveal delay={200}>
-                  <p className="text-slate-200 text-lg leading-relaxed">
+                  <p className="text-[#C7D3DD] text-lg leading-relaxed">
                     {RESUME_DATA.about}
                   </p>
                 </Reveal>
@@ -508,7 +544,7 @@ const Portfolio = () => {
                     <Reveal key={i} delay={300 + (i * 100)} animation="fade-up">
                       <div className="p-6 rounded-sm border border-[#1A2634] bg-[#1A2634]/50 hover:bg-[#1A2634] hover:border-[#00E3C2] transition-all group">
                         <h3 className="text-4xl font-bold mb-1 text-white group-hover:text-[#00E3C2] transition-colors">{item.count}</h3>
-                        <p className="text-sm font-semibold uppercase tracking-wider text-slate-300">{item.label}</p>
+                        <p className="text-sm font-semibold uppercase tracking-wider text-[#C7D3DD]">{item.label}</p>
                       </div>
                     </Reveal>
                   ))}
@@ -521,7 +557,7 @@ const Portfolio = () => {
                     </h4>
                     <div className="flex gap-3">
                       {["English", "Tamil"].map((lang) => (
-                        <span key={lang} className="px-5 py-2 rounded-sm bg-[#1A2634] border border-[#1A2634] text-slate-300 font-medium shadow-sm hover:border-[#00E3C2] hover:text-[#00E3C2] transition-all cursor-default">
+                        <span key={lang} className="px-5 py-2 rounded-sm bg-[#1A2634] border border-[#1A2634] text-[#C7D3DD] font-medium shadow-sm hover:border-[#00E3C2] hover:text-[#00E3C2] transition-all cursor-default">
                           {lang}
                         </span>
                       ))}
@@ -685,7 +721,7 @@ const Portfolio = () => {
                   <div className="group flex flex-col h-full bg-[#1A2634] border border-[#1A2634] rounded-sm overflow-hidden hover:border-[#00E3C2]/30 transition-all duration-300 hover:shadow-xl hover:shadow-[#00E3C2]/10">
                     <div className="relative h-48 bg-[#0B0F14] overflow-hidden flex items-center justify-center border-b border-[#1A2634]">
                        {/* Placeholder Icons for Imagery */}
-                       <div className="text-slate-300/50 group-hover:text-[#00E3C2] group-hover:scale-110 transition-all duration-500 opacity-50 group-hover:opacity-100">
+                       <div className="text-[#C7D3DD]/50 group-hover:text-[#00E3C2] group-hover:scale-110 transition-all duration-500 opacity-50 group-hover:opacity-100">
                           {project.image === 'shield' && <Shield size={80} strokeWidth={1} />}
                           {project.image === 'terminal' && <Terminal size={80} strokeWidth={1} />}
                           {project.image === 'bot' && <Bot size={80} strokeWidth={1} />}
@@ -716,16 +752,16 @@ const Portfolio = () => {
                           </button>
                        </div>
 
-                       <p className="text-slate-300 text-sm mb-6 flex-1 opacity-80">{project.desc}</p>
+                       <p className="text-[#C7D3DD] text-sm mb-6 flex-1 opacity-80">{project.desc}</p>
 
                        <div className="flex flex-wrap gap-2 mb-4">
                           {project.tags.map(tag => (
-                            <span key={tag} className="px-3 py-1 bg-[#0B0F14] border border-[#1A2634] text-slate-300 text-xs rounded-full group-hover:border-[#00E3C2]/30 transition-colors">{tag}</span>
+                            <span key={tag} className="px-3 py-1 bg-[#0B0F14] border border-[#1A2634] text-[#C7D3DD] text-xs rounded-full group-hover:border-[#00E3C2]/30 transition-colors">{tag}</span>
                           ))}
                        </div>
 
                        {projectInsights[idx] && (
-                          <div className="mt-auto p-4 bg-[#00E3C2]/10 text-slate-300 rounded-sm text-sm border border-[#00E3C2]/30 animate-in fade-in">
+                          <div className="mt-auto p-4 bg-[#00E3C2]/10 text-[#C7D3DD] rounded-sm text-sm border border-[#00E3C2]/30 animate-in fade-in">
                              <div className="flex items-center gap-2 font-bold text-[#00E3C2] text-xs uppercase mb-1">
                                <Bot size={14} /> AI Analysis
                              </div>
@@ -740,7 +776,7 @@ const Portfolio = () => {
            </div>
         </section>
 
-        {/* CONTACT SECTION */}
+        {/* CONTACT SECTION - UPDATED WITH FORMSUBMIT */}
         <section id="contact" className="py-20 md:py-32 bg-[#0B0F14] relative">
           <div className="container mx-auto px-5 sm:px-7 max-w-[80rem]">
             <Reveal>
@@ -756,27 +792,27 @@ const Portfolio = () => {
               <div className="md:col-span-2 bg-[#081F2F] p-8 text-white flex flex-col justify-between border-r border-[#1A2634]">
                  <div>
                    <h3 className="text-xl font-bold mb-6 text-[#00E3C2]">Contact Information</h3>
-                   <p className="text-slate-300 mb-8 text-sm opacity-80">Open to full-time opportunities and freelance projects. Let's build something secure.</p>
+                   <p className="text-[#C7D3DD] mb-8 text-sm opacity-80">Open to full-time opportunities and freelance projects. Let's build something secure.</p>
 
                    <div className="space-y-6">
                      <div className="flex items-start gap-4 group">
                        <Mail className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm break-all text-slate-300">{RESUME_DATA.email}</div>
+                       <div className="text-sm break-all text-[#C7D3DD]">{RESUME_DATA.email}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <Phone className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-slate-300">{RESUME_DATA.phone}</div>
+                       <div className="text-sm text-[#C7D3DD]">{RESUME_DATA.phone}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <MapPin className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-slate-300">{RESUME_DATA.location}</div>
+                       <div className="text-sm text-[#C7D3DD]">{RESUME_DATA.location}</div>
                      </div>
                    </div>
                  </div>
 
                  <div className="flex gap-4 mt-8">
-                    <a href="#" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors"><Linkedin size={18}/></a>
-                    <a href="#" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors"><Github size={18}/></a>
+                    <a href="https://www.linkedin.com/in/elangovan4641477/" target="_blank" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-[#C7D3DD] transition-colors"><Linkedin size={18}/></a>
+                    <a href="https://github.com/Jarvis2024-hub" target="_blank" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-[#C7D3DD] transition-colors"><Github size={18}/></a>
                  </div>
               </div>
 
@@ -805,56 +841,58 @@ const Portfolio = () => {
                    </div>
                 </div>
 
-                {/* UPDATED CONTACT FORM */}
-                <form
-                  action="https://formsubmit.co/elangovan.cybersec@gmail.com"
-                  method="POST"
-                  className="space-y-6"
-                >
-                   {/* FormSubmit Configuration */}
-                   <input type="hidden" name="_captcha" value="false" />
-                   <input type="hidden" name="_next" value="https://my-cyber-portfolio.vercel.app/" />
-                   <input type="hidden" name="_template" value="table" />
-                   <input type="hidden" name="_subject" value="New Portfolio Inquiry!" />
-
-                   <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs font-bold text-slate-300 uppercase mb-1 block">Name</label>
-                        <input
-                          type="text"
-                          name="name"
-                          required
-                          className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
-                          placeholder="John Doe"
-                        />
+                {/* AJAX FORM */}
+                {isFormSubmitted ? (
+                   <div className="bg-[#00E3C2]/10 border border-[#00E3C2] p-8 rounded-sm text-center animate-in fade-in zoom-in-95">
+                      <div className="w-16 h-16 bg-[#00E3C2] rounded-full flex items-center justify-center mx-auto mb-4">
+                         <CheckCircle size={32} className="text-[#0B0F14]"/>
                       </div>
-                      <div>
-                        <label className="text-xs font-bold text-slate-300 uppercase mb-1 block">Email</label>
-                        <input
-                          type="email"
-                          name="email"
+                      <h3 className="text-xl font-bold text-white mb-2">Message Sent!</h3>
+                      <p className="text-[#C7D3DD] mb-4">Thanks for reaching out. I'll get back to you shortly.</p>
+                      <button onClick={() => setIsFormSubmitted(false)} className="text-[#00E3C2] font-bold hover:underline text-sm">Send another message</button>
+                   </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="space-y-6">
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Name</label>
+                          <input
+                            type="text"
+                            name="name"
+                            required
+                            className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
+                            placeholder="John Doe"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Email</label>
+                          <input
+                            type="email"
+                            name="email"
+                            required
+                            className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
+                            placeholder="john@example.com"
+                          />
+                        </div>
+                     </div>
+                     <div>
+                        <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Message</label>
+                        <textarea
+                          name="message"
                           required
-                          className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
-                          placeholder="john@example.com"
+                          rows={4}
+                          className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all resize-none placeholder-[#1A2634]"
+                          placeholder="Project details..."
+                          value={contactMessage}
+                          onChange={(e) => setContactMessage(e.target.value)}
                         />
-                      </div>
-                   </div>
-                   <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase mb-1 block">Message</label>
-                      <textarea
-                        name="message"
-                        required
-                        rows={4}
-                        className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all resize-none placeholder-[#1A2634]"
-                        placeholder="Project details..."
-                        value={contactMessage}
-                        onChange={(e) => setContactMessage(e.target.value)}
-                      />
-                   </div>
-                   <button type="submit" className="w-full py-3 bg-[#00E3C2] text-[#0B0F14] font-bold rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.2)] hover:shadow-[0_0_30px_rgba(0,227,194,0.4)] hover:scale-[1.02] transition-all flex justify-center items-center gap-2 uppercase tracking-wide text-sm">
-                      Send Message <Send size={18}/>
-                   </button>
-                </form>
+                     </div>
+                     <button type="submit" disabled={isSubmittingForm} className="w-full py-3 bg-[#00E3C2] text-[#0B0F14] font-bold rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.2)] hover:shadow-[0_0_30px_rgba(0,227,194,0.4)] hover:scale-[1.02] transition-all flex justify-center items-center gap-2 uppercase tracking-wide text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        {isSubmittingForm ? <Loader2 size={18} className="animate-spin"/> : <Send size={18}/>}
+                        {isSubmittingForm ? 'Sending...' : 'Send Message'}
+                     </button>
+                  </form>
+                )}
               </div>
 
             </div>
@@ -864,7 +902,7 @@ const Portfolio = () => {
       </main>
 
       {/* FOOTER */}
-      <footer className="py-8 bg-[#0B0F14] text-center border-t border-[#1A2634] text-slate-300 text-sm">
+      <footer className="py-8 bg-[#0B0F14] text-center border-t border-[#1A2634] text-[#C7D3DD] text-sm">
          <p>© {new Date().getFullYear()} Elangovan P. <span className="text-[#00E3C2]">System Secure</span>.</p>
       </footer>
 
@@ -886,7 +924,7 @@ const Portfolio = () => {
                 onChange={(e) => setJobDesc(e.target.value)}
               />
               {jobAnalysis && (
-                <div className="bg-[#00E3C2]/10 border border-[#00E3C2]/30 rounded-sm p-4 mb-6 text-sm text-slate-300 animate-in slide-in-from-bottom-2">
+                <div className="bg-[#00E3C2]/10 border border-[#00E3C2]/30 rounded-sm p-4 mb-6 text-sm text-[#C7D3DD] animate-in slide-in-from-bottom-2">
                   <div className="flex items-center gap-2 font-bold text-[#00E3C2] mb-2"><Sparkles size={16}/> Match Report</div>
                   <div className="whitespace-pre-line">{jobAnalysis}</div>
                 </div>
@@ -913,7 +951,7 @@ const Portfolio = () => {
                  <div className="w-8 h-8 bg-[#00E3C2] rounded-full flex items-center justify-center text-[#0B0F14]"><Bot size={18} /></div>
                  <div>
                     <h3 className="font-bold text-sm">Elangovan AI</h3>
-                    <p className="text-[10px] text-slate-300 flex items-center gap-1"><span className="w-1.5 h-1.5 bg-[#00E3C2] rounded-full animate-pulse"></span> Online</p>
+                    <p className="text-[10px] text-[#C7D3DD] flex items-center gap-1"><span className="w-1.5 h-1.5 bg-[#00E3C2] rounded-full animate-pulse"></span> Online</p>
                  </div>
               </div>
               <button onClick={() => setIsChatOpen(false)}><X size={18} /></button>
@@ -922,7 +960,7 @@ const Portfolio = () => {
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0B0F14]">
               {messages.map((msg, idx) => (
                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] p-3 rounded-sm text-sm shadow-sm ${msg.role === 'user' ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-[#1A2634] border border-[#1A2634] text-slate-300'}`}>
+                  <div className={`max-w-[85%] p-3 rounded-sm text-sm shadow-sm ${msg.role === 'user' ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-[#1A2634] border border-[#1A2634] text-[#C7D3DD]'}`}>
                     {msg.text}
                   </div>
                 </div>
