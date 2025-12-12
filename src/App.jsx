@@ -288,12 +288,12 @@ const Portfolio = () => {
 
   // --- RENDER ---
   return (
-    <div className="min-h-screen bg-[#0B0F14] font-sans text-[#C7D3DD] selection:bg-[#00E3C2] selection:text-[#0B0F14] overflow-x-hidden">
+    <div className="min-h-screen bg-[#0B0F14] font-sans text-slate-200 selection:bg-[#00E3C2] selection:text-[#0B0F14] overflow-x-hidden">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
         html { scroll-behavior: smooth; }
         body { font-family: 'Space Grotesk', sans-serif; }
-        
+
         /* Elite Cybersecurity Theme */
         :root {
           --obsidian: #0B0F14; /* Deep Background */
@@ -307,10 +307,10 @@ const Portfolio = () => {
         .text-accent { color: var(--teal); }
         .bg-accent { background-color: var(--teal); }
         .border-accent { border-color: var(--teal); }
-        
+
         .bg-carbon { background-color: var(--carbon); }
         .hover-bg-tint:hover { background-color: var(--tint); }
-        
+
         /* Glassmorphism with Teal tint */
         .glass {
           background: rgba(26, 38, 52, 0.7);
@@ -318,12 +318,12 @@ const Portfolio = () => {
           -webkit-backdrop-filter: blur(12px);
           border: 1px solid var(--glass-border);
         }
-        
+
         /* Animations */
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-float-delayed { animation: float 6s ease-in-out 3s infinite; }
-        
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--obsidian); }
@@ -338,12 +338,12 @@ const Portfolio = () => {
              <div className="w-10 h-10 bg-[#00E3C2] text-[#0B0F14] flex items-center justify-center font-bold text-lg rounded-sm shadow-[0_0_15px_rgba(0,227,194,0.3)] transform group-hover:rotate-45 transition-all duration-300">EP</div>
              <span className="font-bold text-lg text-white tracking-widest hidden sm:block group-hover:text-[#00E3C2] transition-colors">ELANGOVAN</span>
           </div>
-          
+
           <div className="flex items-center gap-8">
             <nav className="hidden md:flex gap-8 text-sm font-medium text-[#C7D3DD]">
               {['About', 'Experience', 'Skills', 'Projects'].map((item) => (
-                <button 
-                  key={item} 
+                <button
+                  key={item}
                   onClick={() => scrollTo(item.toLowerCase())}
                   className={`hover:text-[#00E3C2] transition-colors tracking-wide relative group ${activeSection === item.toLowerCase() ? 'text-[#00E3C2]' : ''}`}
                 >
@@ -352,31 +352,40 @@ const Portfolio = () => {
                 </button>
               ))}
             </nav>
-            <button onClick={() => window.print()} className="py-2.5 px-6 bg-[#1A2634] text-[#00E3C2] border border-[#00E3C2]/30 rounded-sm hover:bg-[#00E3C2] hover:text-[#0B0F14] transition-all duration-300 flex items-center gap-2 text-sm font-bold shadow-lg hidden sm:flex group tracking-wider">
+            {/* UPDATED DOWNLOAD BUTTON */}
+            <a
+              href="/resume.pdf"
+              download="Elangovan_Resume.pdf"
+              className="py-2.5 px-6 bg-[#1A2634] text-[#00E3C2] border border-[#00E3C2]/30 rounded-sm hover:bg-[#00E3C2] hover:text-[#0B0F14] transition-all duration-300 flex items-center gap-2 text-sm font-bold shadow-lg hidden sm:flex group tracking-wider"
+            >
               Download CV <Download size={16} className="group-hover:translate-y-1 transition-transform"/>
-            </button>
+            </a>
           </div>
         </div>
       </header>
 
       <main className="relative z-10">
-        
+
         {/* HERO SECTION - OBSIDIAN THEME */}
         <section id="home" className="min-h-screen flex items-center pt-24 pb-20 relative overflow-hidden bg-[#0B0F14]">
+
+          {/* NEW: Central Spotlight Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#00E3C2]/10 rounded-full blur-[120px] pointer-events-none"></div>
+
           {/* Subtle Grid Background */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none" 
-               style={{ 
-                 backgroundImage: 'linear-gradient(#1A2634 1px, transparent 1px), linear-gradient(90deg, #1A2634 1px, transparent 1px)', 
-                 backgroundSize: '40px 40px' 
+          <div className="absolute inset-0 opacity-20 pointer-events-none"
+               style={{
+                 backgroundImage: 'linear-gradient(#1A2634 1px, transparent 1px), linear-gradient(90deg, #1A2634 1px, transparent 1px)',
+                 backgroundSize: '40px 40px'
                }}>
           </div>
-          
+
           {/* Ambient Glows */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00E3C2]/5 rounded-full blur-[100px] pointer-events-none"></div>
-          
+
           <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              
+
               {/* Text Content */}
               <div className="flex flex-col gap-8 max-w-2xl order-2 lg:order-1" style={{ transform: `translate(${mousePos.x * -1}px, ${mousePos.y * -1}px)` }}>
                 <Reveal animation="fade-right">
@@ -388,7 +397,7 @@ const Portfolio = () => {
                     System Status: Online
                   </div>
                 </Reveal>
-                
+
                 <Reveal animation="fade-up" delay={100}>
                   <div className="space-y-2">
                     <h1 className="text-5xl sm:text-7xl xl:text-8xl font-bold leading-tight tracking-tight text-white">
@@ -409,11 +418,11 @@ const Portfolio = () => {
                 <Reveal animation="fade-up" delay={300}>
                   <div className="flex flex-wrap gap-4 mt-4">
                      <button onClick={() => setShowJobModal(true)} className="group px-7 py-4 bg-[#1A2634] text-white border border-[#00E3C2]/20 rounded-sm font-bold hover:border-[#00E3C2] transition-all flex items-center gap-3">
-                        <Briefcase size={20} className="text-[#00E3C2]"/> 
+                        <Briefcase size={20} className="text-[#00E3C2]"/>
                         <span>Check Job Fit</span>
                      </button>
                      <button onClick={() => setIsChatOpen(true)} className="px-7 py-4 bg-[#00E3C2] text-[#0B0F14] rounded-sm font-bold hover:bg-[#00c4a7] transition-all flex items-center gap-3 shadow-[0_0_20px_rgba(0,227,194,0.2)]">
-                        <Sparkles size={20} /> 
+                        <Sparkles size={20} />
                         <span>Ask My AI Twin</span>
                      </button>
                   </div>
@@ -434,25 +443,26 @@ const Portfolio = () => {
                 </Reveal>
               </div>
 
-              {/* Image Content */}
+              {/* Image Content - FIXED ZOOM, SIZE & BRIGHTNESS */}
               <div className="relative flex justify-center lg:justify-end order-1 lg:order-2">
                  <Reveal animation="scale-up" delay={200} className="relative z-10">
-                    <div 
+                    <div
                       className="relative w-[320px] h-[320px] sm:w-[450px] sm:h-[450px] rounded-full overflow-hidden border-2 border-[#00E3C2]/30 shadow-[0_0_30px_rgba(0,227,194,0.1)] transition-transform duration-100 ease-out"
                       style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}
                     >
-                      <div className="absolute inset-0 bg-[#0B0F14]/60 z-10"></div> {/* Dark overlay */}
-                      <img 
-                        src="/profile.jpg" 
+                      {/* Removed the dark overlay to make it colorful and bright */}
+                      {/* Removed grayscale to keep original colors */}
+                      <img
+                        src="/profile.jpg"
                         onError={(e) => {
-                            e.target.onerror = null; 
+                            e.target.onerror = null;
                             e.target.src = "https://placehold.co/400x400/1A2634/00E3C2?text=EP";
                         }}
                         alt="Elangovan P"
-                        className="w-full h-full object-cover grayscale opacity-80 hover:opacity-100 transition-all duration-700"
+                        className="w-full h-full object-cover"
                       />
                     </div>
-                    
+
                     {/* Floating Tech Cards */}
                     <div className="absolute top-12 -left-8 bg-[#1A2634]/90 backdrop-blur-md p-4 rounded-sm shadow-xl border-l-4 border-[#00E3C2] animate-float">
                       <Shield className="text-[#00E3C2] w-8 h-8 mb-2" />
@@ -484,7 +494,7 @@ const Portfolio = () => {
             <div className="flex flex-col lg:flex-row gap-16 items-start">
               <div className="w-full lg:max-w-4xl">
                 <Reveal delay={200}>
-                  <p className="text-[#C7D3DD] text-lg leading-relaxed">
+                  <p className="text-slate-200 text-lg leading-relaxed">
                     {RESUME_DATA.about}
                   </p>
                 </Reveal>
@@ -498,7 +508,7 @@ const Portfolio = () => {
                     <Reveal key={i} delay={300 + (i * 100)} animation="fade-up">
                       <div className="p-6 rounded-sm border border-[#1A2634] bg-[#1A2634]/50 hover:bg-[#1A2634] hover:border-[#00E3C2] transition-all group">
                         <h3 className="text-4xl font-bold mb-1 text-white group-hover:text-[#00E3C2] transition-colors">{item.count}</h3>
-                        <p className="text-sm font-semibold uppercase tracking-wider text-[#C7D3DD]">{item.label}</p>
+                        <p className="text-sm font-semibold uppercase tracking-wider text-slate-300">{item.label}</p>
                       </div>
                     </Reveal>
                   ))}
@@ -511,7 +521,7 @@ const Portfolio = () => {
                     </h4>
                     <div className="flex gap-3">
                       {["English", "Tamil"].map((lang) => (
-                        <span key={lang} className="px-5 py-2 rounded-sm bg-[#1A2634] border border-[#1A2634] text-[#C7D3DD] font-medium shadow-sm hover:border-[#00E3C2] hover:text-[#00E3C2] transition-all cursor-default">
+                        <span key={lang} className="px-5 py-2 rounded-sm bg-[#1A2634] border border-[#1A2634] text-slate-300 font-medium shadow-sm hover:border-[#00E3C2] hover:text-[#00E3C2] transition-all cursor-default">
                           {lang}
                         </span>
                       ))}
@@ -539,7 +549,7 @@ const Portfolio = () => {
                 <Reveal key={index} delay={index * 100}>
                   <div className="group relative pl-8 border-l border-[#1A2634] hover:border-[#00E3C2] transition-colors duration-500">
                     <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-[#0B0F14] border border-[#C7D3DD]/30 group-hover:border-[#00E3C2] group-hover:bg-[#00E3C2] transition-all"></div>
-                    
+
                     <div className="bg-[#1A2634] p-6 rounded-sm border border-[#1A2634] hover:border-[#00E3C2]/50 transition-all hover:bg-[#081F2F]">
                        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2 gap-2">
                           <h3 className="text-xl font-bold text-white group-hover:text-[#00E3C2] transition-colors">{exp.title}</h3>
@@ -563,7 +573,7 @@ const Portfolio = () => {
         <section id="skills" className="py-20 md:py-32 bg-[#0B0F14] relative overflow-hidden">
           {/* Ambient Glow */}
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#00E3C2]/5 rounded-full blur-[120px]"></div>
-          
+
           <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] relative z-10">
             <Reveal>
               <div className="flex items-center gap-4 mb-16 text-white">
@@ -574,7 +584,7 @@ const Portfolio = () => {
             </Reveal>
 
             <div className="grid lg:grid-cols-12 gap-12">
-              
+
               {/* Education Column */}
               <div className="lg:col-span-5 space-y-12">
                 <Reveal animation="fade-right">
@@ -616,7 +626,7 @@ const Portfolio = () => {
                      <Cpu className="text-[#00E3C2]"/> Technical Stack
                    </h3>
                 </Reveal>
-                
+
                 {/* AI Tip Box */}
                 <div className={`mb-6 transition-all duration-300 overflow-hidden ${activeSkillTip.tip ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'}`}>
                    <div className="bg-[#00E3C2]/10 border border-[#00E3C2]/30 text-[#00E3C2] p-4 rounded-sm flex justify-between items-start">
@@ -633,7 +643,7 @@ const Portfolio = () => {
                     const Icon = skill.icon;
                     return (
                       <Reveal key={idx} delay={idx * 50} animation="scale-up">
-                        <div 
+                        <div
                           onClick={() => handleSkillClick(skill.name)}
                           className="bg-[#1A2634] hover:bg-[#081F2F] p-6 rounded-sm border border-[#1A2634] hover:border-[#00E3C2]/50 transition-all cursor-pointer group flex flex-col items-center gap-4 text-center h-full hover:-translate-y-1 shadow-md hover:shadow-[0_0_15px_rgba(0,227,194,0.1)]"
                         >
@@ -675,13 +685,13 @@ const Portfolio = () => {
                   <div className="group flex flex-col h-full bg-[#1A2634] border border-[#1A2634] rounded-sm overflow-hidden hover:border-[#00E3C2]/30 transition-all duration-300 hover:shadow-xl hover:shadow-[#00E3C2]/10">
                     <div className="relative h-48 bg-[#0B0F14] overflow-hidden flex items-center justify-center border-b border-[#1A2634]">
                        {/* Placeholder Icons for Imagery */}
-                       <div className="text-[#C7D3DD]/50 group-hover:text-[#00E3C2] group-hover:scale-110 transition-all duration-500 opacity-50 group-hover:opacity-100">
+                       <div className="text-slate-300/50 group-hover:text-[#00E3C2] group-hover:scale-110 transition-all duration-500 opacity-50 group-hover:opacity-100">
                           {project.image === 'shield' && <Shield size={80} strokeWidth={1} />}
                           {project.image === 'terminal' && <Terminal size={80} strokeWidth={1} />}
                           {project.image === 'bot' && <Bot size={80} strokeWidth={1} />}
                           {project.image === 'cpu' && <Cpu size={80} strokeWidth={1} />}
                        </div>
-                       
+
                        <div className="absolute inset-0 bg-[#0B0F14]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
                           <button className="px-6 py-2 bg-[#00E3C2] text-[#0B0F14] rounded-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2 shadow-lg">
                             View Details <ArrowRight size={16}/>
@@ -695,8 +705,8 @@ const Portfolio = () => {
                              <h3 className="text-xl font-bold text-white group-hover:text-[#00E3C2] transition-colors">{project.title}</h3>
                              <p className="text-xs font-bold text-[#00E3C2]/80 uppercase tracking-wider">{project.client}</p>
                           </div>
-                          
-                          <button 
+
+                          <button
                             onClick={(e) => {e.preventDefault(); handleProjectScan(idx, project)}}
                             disabled={loadingProject === idx}
                             className="p-2 rounded-sm bg-[#0B0F14] border border-[#1A2634] hover:border-[#00E3C2] text-[#00E3C2] transition-colors"
@@ -705,17 +715,17 @@ const Portfolio = () => {
                             {loadingProject === idx ? <Loader2 size={18} className="animate-spin"/> : <ScanEye size={18}/>}
                           </button>
                        </div>
-                       
-                       <p className="text-[#C7D3DD] text-sm mb-6 flex-1 opacity-80">{project.desc}</p>
-                       
+
+                       <p className="text-slate-300 text-sm mb-6 flex-1 opacity-80">{project.desc}</p>
+
                        <div className="flex flex-wrap gap-2 mb-4">
                           {project.tags.map(tag => (
-                            <span key={tag} className="px-3 py-1 bg-[#0B0F14] border border-[#1A2634] text-[#C7D3DD] text-xs rounded-full group-hover:border-[#00E3C2]/30 transition-colors">{tag}</span>
+                            <span key={tag} className="px-3 py-1 bg-[#0B0F14] border border-[#1A2634] text-slate-300 text-xs rounded-full group-hover:border-[#00E3C2]/30 transition-colors">{tag}</span>
                           ))}
                        </div>
 
                        {projectInsights[idx] && (
-                          <div className="mt-auto p-4 bg-[#00E3C2]/10 text-[#C7D3DD] rounded-sm text-sm border border-[#00E3C2]/30 animate-in fade-in">
+                          <div className="mt-auto p-4 bg-[#00E3C2]/10 text-slate-300 rounded-sm text-sm border border-[#00E3C2]/30 animate-in fade-in">
                              <div className="flex items-center gap-2 font-bold text-[#00E3C2] text-xs uppercase mb-1">
                                <Bot size={14} /> AI Analysis
                              </div>
@@ -741,51 +751,51 @@ const Portfolio = () => {
             </Reveal>
 
             <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-0 bg-[#1A2634] rounded-sm overflow-hidden shadow-2xl border border-[#1A2634]">
-              
+
               {/* Contact Info Sidebar */}
               <div className="md:col-span-2 bg-[#081F2F] p-8 text-white flex flex-col justify-between border-r border-[#1A2634]">
                  <div>
                    <h3 className="text-xl font-bold mb-6 text-[#00E3C2]">Contact Information</h3>
-                   <p className="text-[#C7D3DD] mb-8 text-sm opacity-80">Open to full-time opportunities and freelance projects. Let's build something secure.</p>
-                   
+                   <p className="text-slate-300 mb-8 text-sm opacity-80">Open to full-time opportunities and freelance projects. Let's build something secure.</p>
+
                    <div className="space-y-6">
                      <div className="flex items-start gap-4 group">
                        <Mail className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm break-all text-[#C7D3DD]">{RESUME_DATA.email}</div>
+                       <div className="text-sm break-all text-slate-300">{RESUME_DATA.email}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <Phone className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-[#C7D3DD]">{RESUME_DATA.phone}</div>
+                       <div className="text-sm text-slate-300">{RESUME_DATA.phone}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <MapPin className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-[#C7D3DD]">{RESUME_DATA.location}</div>
+                       <div className="text-sm text-slate-300">{RESUME_DATA.location}</div>
                      </div>
                    </div>
                  </div>
 
                  <div className="flex gap-4 mt-8">
-                    <a href="#" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-[#C7D3DD] transition-colors"><Linkedin size={18}/></a>
-                    <a href="#" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-[#C7D3DD] transition-colors"><Github size={18}/></a>
+                    <a href="#" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors"><Linkedin size={18}/></a>
+                    <a href="#" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors"><Github size={18}/></a>
                  </div>
               </div>
 
               {/* Form */}
               <div className="md:col-span-3 p-8 lg:p-12 bg-[#1A2634]">
-                
+
                 {/* AI Feature */}
                 <div className="mb-8 p-4 bg-[#0B0F14] rounded-sm border border-[#1A2634]">
                    <div className="flex items-center justify-between mb-3">
                      <span className="text-xs font-bold text-[#00E3C2] uppercase flex items-center gap-1"><Zap size={14}/> For Recruiters</span>
                    </div>
                    <div className="flex gap-2">
-                      <input 
-                        type="text" placeholder="Company Name" 
+                      <input
+                        type="text" placeholder="Company Name"
                         className="flex-1 p-2 text-sm bg-[#1A2634] border border-[#1A2634] rounded-sm text-white focus:outline-none focus:border-[#00E3C2]"
                         value={draftContext.company}
                         onChange={(e) => setDraftContext({...draftContext, company: e.target.value})}
                       />
-                      <button 
+                      <button
                         onClick={handleMagicDraft} disabled={isDrafting}
                         className="px-4 py-2 bg-[#00E3C2] text-[#0B0F14] text-xs font-bold rounded-sm hover:bg-[#00c4a7] transition-colors flex items-center gap-2"
                       >
@@ -795,28 +805,53 @@ const Portfolio = () => {
                    </div>
                 </div>
 
-                <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+                {/* UPDATED CONTACT FORM */}
+                <form
+                  action="https://formsubmit.co/elangovan.cybersec@gmail.com"
+                  method="POST"
+                  className="space-y-6"
+                >
+                   {/* FormSubmit Configuration */}
+                   <input type="hidden" name="_captcha" value="false" />
+                   <input type="hidden" name="_next" value="https://my-cyber-portfolio.vercel.app/" />
+                   <input type="hidden" name="_template" value="table" />
+                   <input type="hidden" name="_subject" value="New Portfolio Inquiry!" />
+
                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Name</label>
-                        <input type="text" className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]" placeholder="John Doe"/>
+                        <label className="text-xs font-bold text-slate-300 uppercase mb-1 block">Name</label>
+                        <input
+                          type="text"
+                          name="name"
+                          required
+                          className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
+                          placeholder="John Doe"
+                        />
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Email</label>
-                        <input type="email" className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]" placeholder="john@example.com"/>
+                        <label className="text-xs font-bold text-slate-300 uppercase mb-1 block">Email</label>
+                        <input
+                          type="email"
+                          name="email"
+                          required
+                          className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
+                          placeholder="john@example.com"
+                        />
                       </div>
                    </div>
                    <div>
-                      <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Message</label>
-                      <textarea 
-                        rows={4} 
-                        className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all resize-none placeholder-[#1A2634]" 
+                      <label className="text-xs font-bold text-slate-300 uppercase mb-1 block">Message</label>
+                      <textarea
+                        name="message"
+                        required
+                        rows={4}
+                        className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all resize-none placeholder-[#1A2634]"
                         placeholder="Project details..."
                         value={contactMessage}
                         onChange={(e) => setContactMessage(e.target.value)}
                       />
                    </div>
-                   <button className="w-full py-3 bg-[#00E3C2] text-[#0B0F14] font-bold rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.2)] hover:shadow-[0_0_30px_rgba(0,227,194,0.4)] hover:scale-[1.02] transition-all flex justify-center items-center gap-2 uppercase tracking-wide text-sm">
+                   <button type="submit" className="w-full py-3 bg-[#00E3C2] text-[#0B0F14] font-bold rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.2)] hover:shadow-[0_0_30px_rgba(0,227,194,0.4)] hover:scale-[1.02] transition-all flex justify-center items-center gap-2 uppercase tracking-wide text-sm">
                       Send Message <Send size={18}/>
                    </button>
                 </form>
@@ -829,7 +864,7 @@ const Portfolio = () => {
       </main>
 
       {/* FOOTER */}
-      <footer className="py-8 bg-[#0B0F14] text-center border-t border-[#1A2634] text-[#C7D3DD] text-sm">
+      <footer className="py-8 bg-[#0B0F14] text-center border-t border-[#1A2634] text-slate-300 text-sm">
          <p>© {new Date().getFullYear()} Elangovan P. <span className="text-[#00E3C2]">System Secure</span>.</p>
       </footer>
 
@@ -844,19 +879,19 @@ const Portfolio = () => {
               <button onClick={() => setShowJobModal(false)} className="hover:text-[#00E3C2] transition-colors"><X size={24}/></button>
             </div>
             <div className="p-8 bg-[#0B0F14]">
-              <textarea 
+              <textarea
                 className="w-full p-4 bg-[#1A2634] border border-[#1A2634] rounded-sm mb-6 h-32 focus:outline-none focus:border-[#00E3C2] transition-all text-sm text-white placeholder-[#C7D3DD]/30"
                 placeholder="Paste Job Description here..."
                 value={jobDesc}
                 onChange={(e) => setJobDesc(e.target.value)}
               />
               {jobAnalysis && (
-                <div className="bg-[#00E3C2]/10 border border-[#00E3C2]/30 rounded-sm p-4 mb-6 text-sm text-[#C7D3DD] animate-in slide-in-from-bottom-2">
+                <div className="bg-[#00E3C2]/10 border border-[#00E3C2]/30 rounded-sm p-4 mb-6 text-sm text-slate-300 animate-in slide-in-from-bottom-2">
                   <div className="flex items-center gap-2 font-bold text-[#00E3C2] mb-2"><Sparkles size={16}/> Match Report</div>
                   <div className="whitespace-pre-line">{jobAnalysis}</div>
                 </div>
               )}
-              <button 
+              <button
                 onClick={handleJobAnalysis}
                 disabled={isAnalyzingJob || !jobDesc}
                 className="w-full py-3 bg-[#00E3C2] text-[#0B0F14] rounded-sm font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(0,227,194,0.3)] uppercase tracking-wide text-sm"
@@ -878,16 +913,16 @@ const Portfolio = () => {
                  <div className="w-8 h-8 bg-[#00E3C2] rounded-full flex items-center justify-center text-[#0B0F14]"><Bot size={18} /></div>
                  <div>
                     <h3 className="font-bold text-sm">Elangovan AI</h3>
-                    <p className="text-[10px] text-[#C7D3DD] flex items-center gap-1"><span className="w-1.5 h-1.5 bg-[#00E3C2] rounded-full animate-pulse"></span> Online</p>
+                    <p className="text-[10px] text-slate-300 flex items-center gap-1"><span className="w-1.5 h-1.5 bg-[#00E3C2] rounded-full animate-pulse"></span> Online</p>
                  </div>
               </div>
               <button onClick={() => setIsChatOpen(false)}><X size={18} /></button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0B0F14]">
               {messages.map((msg, idx) => (
                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] p-3 rounded-sm text-sm shadow-sm ${msg.role === 'user' ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-[#1A2634] border border-[#1A2634] text-[#C7D3DD]'}`}>
+                  <div className={`max-w-[85%] p-3 rounded-sm text-sm shadow-sm ${msg.role === 'user' ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-[#1A2634] border border-[#1A2634] text-slate-300'}`}>
                     {msg.text}
                   </div>
                 </div>
