@@ -4,12 +4,14 @@ import {
   ExternalLink, Code, Database, Shield, Terminal, 
   Cpu, Globe, MapPin, Send, X, Sparkles, Loader2, 
   Bot, ScanEye, Briefcase, CheckCircle, Lightbulb,
-  ChevronRight, ArrowRight, Zap, Play, Layers
+  ChevronRight, ArrowRight, Zap, Play, Layers,
+  Sun, Moon
 } from 'lucide-react';
 
 // --- DATA CONTEXT ---
 const RESUME_DATA = {
-  name: "Elangovan P",
+  name: "Elangovan",
+  fullName: "Elangovan P",
   role: "Certified Penetration Tester",
   about: "Passionate cybersecurity professional aiming to excel in Red Teaming and Penetration Testing. Focused on advancing offensive security expertise and proactively uncovering vulnerabilities to outpace evolving threats. Dedicated to continuous skill growth and driving high-impact security operations.",
   location: "Villupuram, Tamilnadu",
@@ -84,7 +86,7 @@ const RESUME_DATA = {
     {
       title: "Nexora",
       client: "EdTech Security",
-      image: "shield", 
+      image: "shield",
       desc: "Web app for penetration testing and secure coding practice with gamified features.",
       tags: ["React", "Security", "Gamification"]
     },
@@ -138,12 +140,12 @@ const useReveal = (threshold = 0.1) => {
 
 const Reveal = ({ children, className = "", delay = 0, animation = "fade-up" }) => {
   const [ref, isVisible] = useReveal();
-  
+
   return (
-    <div 
-      ref={ref} 
-      className={`${className} transition-all duration-1000 ease-out transform ${isVisible ? 'opacity-100 translate-y-0 translate-x-0 scale-100' : 
-        animation === 'fade-up' ? 'opacity-0 translate-y-12' : 
+    <div
+      ref={ref}
+      className={`${className} transition-all duration-1000 ease-out transform ${isVisible ? 'opacity-100 translate-y-0 translate-x-0 scale-100' :
+        animation === 'fade-up' ? 'opacity-0 translate-y-12' :
         animation === 'fade-right' ? 'opacity-0 -translate-x-12' :
         animation === 'scale-up' ? 'opacity-0 scale-90' :
         'opacity-0'
@@ -152,6 +154,48 @@ const Reveal = ({ children, className = "", delay = 0, animation = "fade-up" }) 
     >
       {children}
     </div>
+  );
+};
+
+// --- TYPEWRITER COMPONENT ---
+const Typewriter = ({ words, className }) => {
+  const [index, setIndex] = useState(0);
+  const [subIndex, setSubIndex] = useState(0);
+  const [reverse, setReverse] = useState(false);
+  const [blink, setBlink] = useState(true);
+
+  useEffect(() => {
+    if (index === words.length) return;
+
+    if ( subIndex === words[index].length + 1 && !reverse ) {
+      setReverse(true);
+      return;
+    }
+
+    if (subIndex === 0 && reverse) {
+      setReverse(false);
+      setIndex((prev) => (prev + 1) % words.length);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setSubIndex((prev) => prev + (reverse ? -1 : 1));
+    }, Math.max(reverse ? 50 : subIndex === words[index].length ? 2000 : 70, parseInt(Math.random() * 50)));
+
+    return () => clearTimeout(timeout);
+  }, [subIndex, index, reverse, words]);
+
+  useEffect(() => {
+    const timeout2 = setTimeout(() => {
+      setBlink((prev) => !prev);
+    }, 500);
+    return () => clearTimeout(timeout2);
+  }, [blink]);
+
+  return (
+    <span className={className}>
+      {words[index].substring(0, subIndex)}{blink ? "|" : " "}
+    </span>
   );
 };
 
@@ -165,6 +209,7 @@ const Portfolio = () => {
   const [inputValue, setInputValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const chatEndRef = useRef(null);
+  const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
 
   // Gemini Features State
   const [draftContext, setDraftContext] = useState({ company: '', role: '' });
@@ -178,23 +223,10 @@ const Portfolio = () => {
   const [isAnalyzingJob, setIsAnalyzingJob] = useState(false);
   const [activeSkillTip, setActiveSkillTip] = useState({ skill: '', tip: '' });
   const [loadingSkill, setLoadingSkill] = useState('');
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // NEW: Contact Form State
+  // Contact Form State
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-
-  // Parallax Effect
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({
-        x: (e.clientX / window.innerWidth) * 20 - 10,
-        y: (e.clientY / window.innerHeight) * 20 - 10
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   // Scroll Spy
   useEffect(() => {
@@ -212,9 +244,13 @@ const Portfolio = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   // --- API HELPER ---
   const callGemini = async (prompt, systemInstruction = "") => {
-    const apiKey = "AIzaSyDSW_Pi5gNIeN0mqBGiJUKqVeWrshBLoTM"; // Runtime provided
+    const apiKey = ""; // Runtime provided - ADD YOUR KEY HERE
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
@@ -257,7 +293,12 @@ const Portfolio = () => {
   const handleMagicDraft = async () => {
     if (!draftContext.company) return alert("Please enter a company name.");
     setIsDrafting(true);
-    const prompt = `Write a short, punchy cover letter email from Elangovan to ${draftContext.company} for the ${draftContext.role || 'Cybersecurity'} role. Highlight his CPT certification and internship at Redynox.`;
+
+    const prompt = `Write a professional recruitment email FROM a hiring manager at "${draftContext.company}" TO "Elangovan".
+    Role: ${draftContext.role || 'Cybersecurity Specialist'}.
+    Context: Mention you found his portfolio impressive, specifically his CPT certification and internship at Redynox.
+    Ask for his availability for an interview. Keep it concise (under 100 words).`;
+
     const draft = await callGemini(prompt);
     setContactMessage(draft);
     setIsDrafting(false);
@@ -290,7 +331,6 @@ const Portfolio = () => {
     setLoadingSkill('');
   };
 
-  // NEW: Handle Contact Form Submission (AJAX to avoid redirect)
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setIsSubmittingForm(true);
@@ -298,13 +338,10 @@ const Portfolio = () => {
     const formData = new FormData(e.target);
 
     try {
-        // Use the AJAX endpoint of FormSubmit to prevent redirection
         const response = await fetch("https://formsubmit.co/ajax/elangovan.cybersec@gmail.com", {
             method: "POST",
             body: formData,
-            headers: {
-                'Accept': 'application/json'
-            }
+            headers: { 'Accept': 'application/json' }
         });
 
         if (response.ok) {
@@ -322,62 +359,99 @@ const Portfolio = () => {
     }
   };
 
+  // --- STYLES FOR THEMES ---
+  const isDark = theme === 'dark';
+  const bgColor = isDark ? 'bg-[#0B0F14]' : 'bg-slate-50';
+  const textColor = isDark ? 'text-slate-200' : 'text-slate-800';
+  const muteColor = isDark ? 'text-[#C7D3DD]' : 'text-slate-600';
+  const cardBg = isDark ? 'bg-[#1A2634]' : 'bg-white';
+  const borderColor = isDark ? 'border-[#1A2634]' : 'border-slate-200';
+  const navText = isDark ? 'text-[#C7D3DD]' : 'text-slate-600';
+  const glassClass = isDark ? 'bg-[#1A2634]/90 backdrop-blur-md border-[#1A2634]' : 'bg-white/80 backdrop-blur-md border-slate-200';
+  const inputBg = isDark ? 'bg-[#0B0F14]' : 'bg-slate-50';
+  const inputBorder = isDark ? 'border-[#1A2634]' : 'border-slate-300';
+  const inputPlaceholder = isDark ? 'placeholder-[#C7D3DD]/30' : 'placeholder-slate-400';
+
   // --- RENDER ---
   return (
-    <div className="min-h-screen bg-[#0B0F14] font-sans text-slate-200 selection:bg-[#00E3C2] selection:text-[#0B0F14] overflow-x-hidden">
+    <div className={`min-h-screen ${bgColor} font-sans ${textColor} selection:bg-[#00E3C2] selection:text-[#0B0F14] overflow-x-hidden transition-colors duration-500`}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         html { scroll-behavior: smooth; }
-        body { font-family: 'Space Grotesk', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        /* Elite Cybersecurity Theme */
         :root {
-          --obsidian: #0B0F14; /* Deep Background */
-          --carbon: #1A2634;   /* Cards/Containers */
-          --teal: #00E3C2;     /* Electric Accents */
-          --iron: #C7D3DD;     /* Text */
-          --tint: #081F2F;     /* Hover Tint */
-          --glass-border: rgba(0, 227, 194, 0.1);
+          --teal: #00E3C2;
         }
 
-        .text-accent { color: var(--teal); }
-        .bg-accent { background-color: var(--teal); }
-        .border-accent { border-color: var(--teal); }
-
-        .bg-carbon { background-color: var(--carbon); }
-        .hover-bg-tint:hover { background-color: var(--tint); }
-
-        /* Glassmorphism with Teal tint */
-        .glass {
+        .glass-dark {
           background: rgba(26, 38, 52, 0.7);
           backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid var(--glass-border);
+          border: 1px solid rgba(0, 227, 194, 0.1);
         }
 
-        /* Animations */
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float 6s ease-in-out 3s infinite; }
+        .glass-light {
+           background: rgba(255, 255, 255, 0.7);
+           backdrop-filter: blur(12px);
+           border: 1px solid rgba(0, 0, 0, 0.05);
+        }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--obsidian); }
-        ::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: ${isDark ? '#0B0F14' : '#F8FAFC'}; }
+        ::-webkit-scrollbar-thumb { background: #00E3C2; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #00b399; }
+
+        @keyframes roam {
+            0% { transform: translate(0, 0); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translate(100px, -100px); opacity: 0; }
+        }
+        .galaxy-star {
+            position: fixed;
+            background: #00E3C2;
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
       `}</style>
 
+      {/* BACKGROUND (Conditionally rendered or styled) */}
+      <div className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-700">
+         {/* Subtle Texture for Light Mode */}
+         {!isDark && (
+             <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#CBD5E1 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+         )}
+         {/* Stars - always there but maybe less visible in light mode */}
+         {[...Array(60)].map((_, i) => (
+           <div
+             key={i}
+             className="galaxy-star"
+             style={{
+                width: Math.random() * 3 + 'px',
+                height: Math.random() * 3 + 'px',
+                top: Math.random() * 100 + '%',
+                left: Math.random() * 100 + '%',
+                animation: `roam ${Math.random() * 20 + 10}s linear infinite`,
+                animationDelay: `${Math.random() * 10}s`,
+                opacity: isDark ? (Math.random() * 0.5 + 0.1) : (Math.random() * 0.3 + 0.1),
+                backgroundColor: isDark ? '#00E3C2' : '#0F766E' // Darker teal stars in light mode
+             }}
+           ></div>
+        ))}
+      </div>
+
       {/* HEADER */}
-      <header className="fixed top-0 left-0 w-full z-50 glass py-4 transition-all duration-300 border-b border-[#1A2634]">
+      <header className={`fixed top-0 left-0 w-full z-50 py-4 transition-all duration-300 border-b ${isDark ? 'glass-dark border-[#1A2634]' : 'glass-light border-slate-200'}`}>
         <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] flex justify-between items-center">
           <div onClick={() => scrollTo('home')} className="cursor-pointer group flex items-center gap-3">
-             <div className="w-10 h-10 bg-[#00E3C2] text-[#0B0F14] flex items-center justify-center font-bold text-lg rounded-sm shadow-[0_0_15px_rgba(0,227,194,0.3)] transform group-hover:rotate-45 transition-all duration-300">EP</div>
-             <span className="font-bold text-lg text-white tracking-widest hidden sm:block group-hover:text-[#00E3C2] transition-colors">ELANGOVAN</span>
+             <div className={`w-10 h-10 ${isDark ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-teal-600 text-white'} flex items-center justify-center font-bold text-lg rounded-sm shadow-[0_0_15px_rgba(0,227,194,0.3)] transform group-hover:rotate-45 transition-all duration-300`}>EP</div>
+             <span className={`font-bold text-lg ${isDark ? 'text-white' : 'text-slate-800'} tracking-widest hidden sm:block group-hover:text-[#00E3C2] transition-colors`}>ELANGOVAN</span>
           </div>
 
-          <div className="flex items-center gap-8">
-            <nav className="hidden md:flex gap-8 text-sm font-medium text-[#C7D3DD]">
-              {['About', 'Experience', 'Skills', 'Projects'].map((item) => (
+          <div className="flex items-center gap-6">
+            <nav className={`hidden md:flex gap-8 text-sm font-medium ${navText}`}>
+              {['About', 'Experience', 'Skills', 'Projects', 'Contact'].map((item) => (
                 <button
                   key={item}
                   onClick={() => scrollTo(item.toLowerCase())}
@@ -388,11 +462,20 @@ const Portfolio = () => {
                 </button>
               ))}
             </nav>
-            {/* UPDATED DOWNLOAD BUTTON */}
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full transition-colors ${isDark ? 'bg-[#1A2634] text-yellow-400 hover:bg-[#253241]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
             <a
               href="/resume.pdf"
               download="Elangovan_Resume.pdf"
-              className="py-2.5 px-6 bg-[#1A2634] text-[#00E3C2] border border-[#00E3C2]/30 rounded-sm hover:bg-[#00E3C2] hover:text-[#0B0F14] transition-all duration-300 flex items-center gap-2 text-sm font-bold shadow-lg hidden sm:flex group tracking-wider"
+              className={`py-2.5 px-6 ${isDark ? 'bg-[#1A2634] text-[#00E3C2] border-[#00E3C2]/30' : 'bg-teal-600 text-white border-teal-600'} border rounded-sm hover:bg-[#00E3C2] hover:text-[#0B0F14] transition-all duration-300 flex items-center gap-2 text-sm font-bold shadow-lg hidden sm:flex group tracking-wider`}
             >
               Download CV <Download size={16} className="group-hover:translate-y-1 transition-transform"/>
             </a>
@@ -402,33 +485,19 @@ const Portfolio = () => {
 
       <main className="relative z-10">
 
-        {/* HERO SECTION - OBSIDIAN THEME */}
-        <section id="home" className="min-h-screen flex items-center pt-24 pb-20 relative overflow-hidden bg-[#0B0F14]">
-
-          {/* NEW: Central Spotlight Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#00E3C2]/10 rounded-full blur-[120px] pointer-events-none"></div>
-
-          {/* Subtle Grid Background */}
-          <div className="absolute inset-0 opacity-20 pointer-events-none"
-               style={{
-                 backgroundImage: 'linear-gradient(#1A2634 1px, transparent 1px), linear-gradient(90deg, #1A2634 1px, transparent 1px)',
-                 backgroundSize: '40px 40px'
-               }}>
-          </div>
-
-          {/* Ambient Glows */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00E3C2]/5 rounded-full blur-[100px] pointer-events-none"></div>
+        {/* HERO SECTION */}
+        <section id="home" className={`min-h-screen flex items-center pt-24 pb-20 relative overflow-hidden ${isDark ? '' : 'bg-slate-50'}`}>
+          {isDark && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#00E3C2]/10 rounded-full blur-[120px] pointer-events-none"></div>}
 
           <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-              {/* Text Content */}
-              <div className="flex flex-col gap-8 max-w-2xl order-2 lg:order-1" style={{ transform: `translate(${mousePos.x * -1}px, ${mousePos.y * -1}px)` }}>
+              <div className="flex flex-col gap-8 max-w-2xl order-2 lg:order-1">
                 <Reveal animation="fade-right">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-[#1A2634]/50 border-l-4 border-[#00E3C2] text-[#00E3C2] text-xs font-bold tracking-widest uppercase">
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-sm ${isDark ? 'bg-[#1A2634]/50 border-l-4 border-[#00E3C2] text-[#00E3C2]' : 'bg-white border-l-4 border-teal-600 text-teal-700 shadow-sm'} text-xs font-bold tracking-widest uppercase`}>
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E3C2] opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00E3C2]"></span>
+                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isDark ? 'bg-[#00E3C2]' : 'bg-teal-600'} opacity-75`}></span>
+                      <span className={`relative inline-flex rounded-full h-2 w-2 ${isDark ? 'bg-[#00E3C2]' : 'bg-teal-600'}`}></span>
                     </span>
                     System Status: Online
                   </div>
@@ -436,28 +505,32 @@ const Portfolio = () => {
 
                 <Reveal animation="fade-up" delay={100}>
                   <div className="space-y-2">
-                    <h1 className="text-5xl sm:text-7xl xl:text-8xl font-bold leading-tight tracking-tight text-white">
-                      Hi, I'm <span className="text-[#00E3C2]">Elangovan</span>
+                    <p className={`text-sm sm:text-base font-bold tracking-widest uppercase mb-1 ${isDark ? 'text-[#00E3C2]' : 'text-teal-600'}`}>I'm</p>
+                    {/* UPDATED: Decreased Name Size slightly */}
+                    <h1 className={`text-6xl sm:text-7xl xl:text-8xl font-extrabold leading-tight tracking-tighter ${isDark ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-600' : 'text-teal-900'} drop-shadow-sm pb-2`}>
+                      Elangovan
                     </h1>
-                    <h2 className="text-2xl sm:text-4xl xl:text-5xl font-semibold text-[#C7D3DD]/80">
-                      Penetration Tester & <br/>Security Researcher
+
+                    {/* UPDATED: Increased Role Size, Highlighted Color, Same Font Family for "I'm" style */}
+                    <h2 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-[#00E3C2]' : 'text-teal-600'} h-[1.2em] tracking-wide mt-2 flex items-center gap-2`}>
+                      <Typewriter className={isDark ? 'text-[#00E3C2]' : 'text-teal-600'} words={["Certified Penetration Tester", "Cybersecurity Researcher", "Cyber Enthusiast"]} />
                     </h2>
                   </div>
                 </Reveal>
 
                 <Reveal animation="fade-up" delay={200}>
-                  <p className="text-[#C7D3DD] text-lg md:text-xl max-w-xl leading-relaxed border-l border-[#1A2634] pl-6 font-light">
+                  <p className={`${muteColor} text-lg md:text-xl max-w-xl leading-relaxed border-l-2 ${isDark ? 'border-[#1A2634]' : 'border-slate-300'} pl-6 font-light`}>
                     {RESUME_DATA.about}
                   </p>
                 </Reveal>
 
                 <Reveal animation="fade-up" delay={300}>
                   <div className="flex flex-wrap gap-4 mt-4">
-                     <button onClick={() => setShowJobModal(true)} className="group px-7 py-4 bg-[#1A2634] text-white border border-[#00E3C2]/20 rounded-sm font-bold hover:border-[#00E3C2] transition-all flex items-center gap-3">
+                     <button onClick={() => setShowJobModal(true)} className={`group px-7 py-4 ${isDark ? 'bg-[#1A2634] text-white border border-[#00E3C2]/20' : 'bg-white text-slate-800 border border-slate-300'} rounded-sm font-bold hover:border-[#00E3C2] transition-all flex items-center gap-3`}>
                         <Briefcase size={20} className="text-[#00E3C2]"/>
                         <span>Check Job Fit</span>
                      </button>
-                     <button onClick={() => setIsChatOpen(true)} className="px-7 py-4 bg-[#00E3C2] text-[#0B0F14] rounded-sm font-bold hover:bg-[#00c4a7] transition-all flex items-center gap-3 shadow-[0_0_20px_rgba(0,227,194,0.2)]">
+                     <button onClick={() => setIsChatOpen(true)} className={`px-7 py-4 ${isDark ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-teal-600 text-white'} rounded-sm font-bold hover:bg-[#00c4a7] transition-all flex items-center gap-3 shadow-[0_0_20px_rgba(0,227,194,0.2)]`}>
                         <Sparkles size={20} />
                         <span>Ask My AI Twin</span>
                      </button>
@@ -471,7 +544,7 @@ const Portfolio = () => {
                        { icon: Linkedin, href: "https://www.linkedin.com/in/elangovan4641477/" },
                        { icon: Mail, href: `mailto:${RESUME_DATA.email}` }
                      ].map((social, i) => (
-                       <a key={i} href={social.href} target="_blank" rel="noreferrer" className="text-[#C7D3DD] hover:text-[#00E3C2] transition-all hover:-translate-y-1 p-2 bg-[#1A2634] rounded-sm hover:bg-[#081F2F]">
+                       <a key={i} href={social.href} target="_blank" rel="noreferrer" className={`${muteColor} hover:text-[#00E3C2] transition-all hover:-translate-y-1 p-2 ${cardBg} rounded-sm hover:bg-opacity-80`}>
                          <social.icon size={20} />
                        </a>
                      ))}
@@ -479,36 +552,16 @@ const Portfolio = () => {
                 </Reveal>
               </div>
 
-              {/* Image Content - FIXED ZOOM, SIZE & BRIGHTNESS */}
               <div className="relative flex justify-center lg:justify-end order-1 lg:order-2">
                  <Reveal animation="scale-up" delay={200} className="relative z-10">
-                    <div
-                      className="relative w-[320px] h-[320px] sm:w-[450px] sm:h-[450px] rounded-full overflow-hidden border-2 border-[#00E3C2]/30 shadow-[0_0_30px_rgba(0,227,194,0.1)] transition-transform duration-100 ease-out"
-                      style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}
-                    >
-                      {/* Removed the dark overlay to make it colorful and bright */}
-                      {/* Removed grayscale to keep original colors */}
-                      <img
-                        src="/profile.jpg"
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://placehold.co/400x400/1A2634/00E3C2?text=EP";
-                        }}
-                        alt="Elangovan P"
-                        className="w-full h-full object-cover"
-                      />
+                    <div className={`relative w-[320px] h-[320px] sm:w-[450px] sm:h-[450px] rounded-full overflow-hidden border-2 ${isDark ? 'border-[#00E3C2]/30' : 'border-teal-600/30'} shadow-[0_0_30px_rgba(0,227,194,0.1)]`}>
+                      <img src="/profile.jpg" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/400x400/1A2634/00E3C2?text=EP"; }} alt="Elangovan P" className="w-full h-full object-cover" />
                     </div>
 
-                    {/* Floating Tech Cards */}
-                    <div className="absolute top-12 -left-8 bg-[#1A2634]/90 backdrop-blur-md p-4 rounded-sm shadow-xl border-l-4 border-[#00E3C2] animate-float">
+                    <div className={`absolute top-12 -left-8 ${isDark ? 'bg-[#1A2634]/90' : 'bg-white/90'} backdrop-blur-md p-4 rounded-sm shadow-xl border-l-4 border-[#00E3C2] animate-float`}>
                       <Shield className="text-[#00E3C2] w-8 h-8 mb-2" />
-                      <p className="font-bold text-white text-sm">Certified</p>
-                      <p className="text-xs text-[#C7D3DD]">Penetration Tester</p>
-                    </div>
-                    <div className="absolute bottom-12 -right-4 bg-[#1A2634]/90 backdrop-blur-md p-4 rounded-sm shadow-xl border-r-4 border-[#00E3C2] animate-float-delayed">
-                      <Terminal className="text-[#00E3C2] w-8 h-8 mb-2" />
-                      <p className="font-bold text-white text-sm">Red Teaming</p>
-                      <p className="text-xs text-[#C7D3DD]">Enthusiast</p>
+                      <p className={`font-bold ${textColor} text-sm`}>Certified</p>
+                      <p className={`text-xs ${isDark ? 'text-[#C7D3DD]' : 'text-slate-500'}`}>Penetration Tester</p>
                     </div>
                  </Reveal>
               </div>
@@ -517,20 +570,22 @@ const Portfolio = () => {
         </section>
 
         {/* ABOUT ME SECTION */}
-        <section id="about" className="py-20 md:py-32 relative bg-[#0B0F14]">
+        <section id="about" className={`py-20 md:py-32 relative ${isDark ? '' : 'bg-white'}`}>
+          {isDark && <div className="absolute inset-0 bg-gradient-to-b from-[#0B0F14] via-[#1A2634]/30 to-[#0B0F14] opacity-50 z-0 pointer-events-none"></div>}
+
           <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] relative z-10">
             <Reveal>
               <div className="flex items-center gap-4 mb-12">
                 <span className="text-[#00E3C2] font-bold text-lg font-mono">01.</span>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">About Me</h2>
-                <div className="h-px bg-[#1A2634] flex-1 ml-4"></div>
+                <h2 className={`text-3xl md:text-4xl font-bold ${textColor}`}>About Me</h2>
+                <div className={`h-px ${isDark ? 'bg-[#1A2634]' : 'bg-slate-200'} flex-1 ml-4`}></div>
               </div>
             </Reveal>
 
             <div className="flex flex-col lg:flex-row gap-16 items-start">
               <div className="w-full lg:max-w-4xl">
                 <Reveal delay={200}>
-                  <p className="text-[#C7D3DD] text-lg leading-relaxed">
+                  <p className={`${muteColor} text-lg leading-relaxed`}>
                     {RESUME_DATA.about}
                   </p>
                 </Reveal>
@@ -542,9 +597,9 @@ const Portfolio = () => {
                     { count: "04", label: "Major Projects" },
                   ].map((item, i) => (
                     <Reveal key={i} delay={300 + (i * 100)} animation="fade-up">
-                      <div className="p-6 rounded-sm border border-[#1A2634] bg-[#1A2634]/50 hover:bg-[#1A2634] hover:border-[#00E3C2] transition-all group">
-                        <h3 className="text-4xl font-bold mb-1 text-white group-hover:text-[#00E3C2] transition-colors">{item.count}</h3>
-                        <p className="text-sm font-semibold uppercase tracking-wider text-[#C7D3DD]">{item.label}</p>
+                      <div className={`p-6 rounded-sm border ${borderColor} ${cardBg} ${isDark ? 'bg-[#1A2634]/50' : ''} hover:border-[#00E3C2] transition-all group`}>
+                        <h3 className={`text-4xl font-bold mb-1 ${textColor} group-hover:text-[#00E3C2] transition-colors`}>{item.count}</h3>
+                        <p className={`text-sm font-semibold uppercase tracking-wider ${isDark ? 'text-[#C7D3DD]' : 'text-slate-500'}`}>{item.label}</p>
                       </div>
                     </Reveal>
                   ))}
@@ -552,12 +607,12 @@ const Portfolio = () => {
 
                 <Reveal delay={500}>
                   <div className="mt-12">
-                    <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <h4 className={`text-lg font-bold ${textColor} mb-4 flex items-center gap-2`}>
                       <Globe size={20} className="text-[#00E3C2]"/> Languages
                     </h4>
                     <div className="flex gap-3">
                       {["English", "Tamil"].map((lang) => (
-                        <span key={lang} className="px-5 py-2 rounded-sm bg-[#1A2634] border border-[#1A2634] text-[#C7D3DD] font-medium shadow-sm hover:border-[#00E3C2] hover:text-[#00E3C2] transition-all cursor-default">
+                        <span key={lang} className={`px-5 py-2 rounded-sm ${cardBg} border ${borderColor} ${muteColor} font-medium shadow-sm hover:border-[#00E3C2] hover:text-[#00E3C2] transition-all cursor-default`}>
                           {lang}
                         </span>
                       ))}
@@ -570,33 +625,33 @@ const Portfolio = () => {
         </section>
 
         {/* EXPERIENCE SECTION */}
-        <section id="experience" className="py-20 md:py-32 bg-[#0B0F14] relative">
+        <section id="experience" className={`py-20 md:py-32 relative ${isDark ? '' : 'bg-slate-50'}`}>
            <div className="container mx-auto px-5 sm:px-7 max-w-[80rem]">
             <Reveal>
               <div className="flex items-center gap-4 mb-16">
                 <span className="text-[#00E3C2] font-bold text-lg font-mono">02.</span>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">Work History</h2>
-                <div className="h-px bg-[#1A2634] flex-1 ml-4"></div>
+                <h2 className={`text-3xl md:text-4xl font-bold ${textColor}`}>Work History</h2>
+                <div className={`h-px ${isDark ? 'bg-[#1A2634]' : 'bg-slate-200'} flex-1 ml-4`}></div>
               </div>
             </Reveal>
 
             <div className="space-y-6">
               {RESUME_DATA.experience.map((exp, index) => (
                 <Reveal key={index} delay={index * 100}>
-                  <div className="group relative pl-8 border-l border-[#1A2634] hover:border-[#00E3C2] transition-colors duration-500">
-                    <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-[#0B0F14] border border-[#C7D3DD]/30 group-hover:border-[#00E3C2] group-hover:bg-[#00E3C2] transition-all"></div>
+                  <div className={`group relative pl-8 border-l ${isDark ? 'border-[#1A2634]' : 'border-slate-200'} hover:border-[#00E3C2] transition-colors duration-500`}>
+                    <div className={`absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full ${bgColor} border ${isDark ? 'border-[#C7D3DD]/30' : 'border-slate-400'} group-hover:border-[#00E3C2] group-hover:bg-[#00E3C2] transition-all`}></div>
 
-                    <div className="bg-[#1A2634] p-6 rounded-sm border border-[#1A2634] hover:border-[#00E3C2]/50 transition-all hover:bg-[#081F2F]">
+                    <div className={`${cardBg} p-6 rounded-sm border ${borderColor} hover:border-[#00E3C2]/50 transition-all hover:shadow-md`}>
                        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2 gap-2">
-                          <h3 className="text-xl font-bold text-white group-hover:text-[#00E3C2] transition-colors">{exp.title}</h3>
-                          <span className="text-sm font-mono text-[#00E3C2] bg-[#00E3C2]/10 px-3 py-1 rounded-sm w-fit">{exp.year}</span>
+                          <h3 className={`text-xl font-bold ${textColor} group-hover:text-[#00E3C2] transition-colors`}>{exp.title}</h3>
+                          <span className={`text-sm font-mono text-[#00E3C2] ${isDark ? 'bg-[#00E3C2]/10' : 'bg-teal-50'} px-3 py-1 rounded-sm w-fit`}>{exp.year}</span>
                        </div>
                        <div className="flex items-center gap-2 mb-4">
-                         <Briefcase size={16} className="text-[#C7D3DD]"/>
-                         <span className="font-semibold text-[#C7D3DD]">{exp.company}</span>
-                         <span className="text-[#C7D3DD]/60 text-sm">• {exp.type}</span>
+                         <Briefcase size={16} className={muteColor}/>
+                         <span className={`font-semibold ${muteColor}`}>{exp.company}</span>
+                         <span className={`${muteColor} text-sm`}>• {exp.type}</span>
                        </div>
-                       <p className="text-[#C7D3DD] leading-relaxed opacity-80">{exp.desc}</p>
+                       <p className={`${muteColor} leading-relaxed opacity-80`}>{exp.desc}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -606,16 +661,16 @@ const Portfolio = () => {
         </section>
 
         {/* SKILLS SECTION */}
-        <section id="skills" className="py-20 md:py-32 bg-[#0B0F14] relative overflow-hidden">
+        <section id="skills" className="py-20 md:py-32 relative overflow-hidden">
           {/* Ambient Glow */}
-          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#00E3C2]/5 rounded-full blur-[120px]"></div>
+          {isDark && <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#00E3C2]/5 rounded-full blur-[120px]"></div>}
 
           <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] relative z-10">
             <Reveal>
               <div className="flex items-center gap-4 mb-16 text-white">
                 <span className="text-[#00E3C2] font-bold text-lg font-mono">03.</span>
-                <h2 className="text-3xl md:text-4xl font-bold">Skills & Education</h2>
-                <div className="h-px bg-[#1A2634] flex-1 ml-4"></div>
+                <h2 className={`text-3xl md:text-4xl font-bold ${textColor}`}>Skills & Education</h2>
+                <div className={`h-px ${isDark ? 'bg-[#1A2634]' : 'bg-slate-200'} flex-1 ml-4`}></div>
               </div>
             </Reveal>
 
@@ -624,29 +679,29 @@ const Portfolio = () => {
               {/* Education Column */}
               <div className="lg:col-span-5 space-y-12">
                 <Reveal animation="fade-right">
-                   <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                   <h3 className={`text-xl font-bold ${textColor} mb-6 flex items-center gap-2`}>
                      <Layers className="text-[#00E3C2]"/> Education Path
                    </h3>
                    <div className="space-y-8">
                     {RESUME_DATA.education.map((edu, idx) => (
-                      <div key={idx} className="relative pl-6 border-l border-[#1A2634] group">
-                        <div className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-[#1A2634] group-hover:bg-[#00E3C2] transition-colors"></div>
-                        <h4 className="text-lg font-bold text-white">{edu.title}</h4>
+                      <div key={idx} className={`relative pl-6 border-l ${isDark ? 'border-[#1A2634]' : 'border-slate-200'} group`}>
+                        <div className={`absolute -left-1.5 top-1.5 w-3 h-3 rounded-full ${isDark ? 'bg-[#1A2634]' : 'bg-slate-300'} group-hover:bg-[#00E3C2] transition-colors`}></div>
+                        <h4 className={`text-lg font-bold ${textColor}`}>{edu.title}</h4>
                         <p className="text-[#00E3C2] text-sm mb-1 opacity-80">{edu.school}</p>
-                        <p className="text-[#C7D3DD] text-sm opacity-60">{edu.year} • {edu.desc}</p>
+                        <p className={`${muteColor} text-sm opacity-60`}>{edu.year} • {edu.desc}</p>
                       </div>
                     ))}
                    </div>
                 </Reveal>
 
                 <Reveal animation="fade-right" delay={200}>
-                  <div className="p-6 rounded-sm bg-[#1A2634] border border-[#1A2634] hover:border-[#00E3C2]/30 transition-colors">
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <div className={`p-6 rounded-sm ${cardBg} border ${borderColor} hover:border-[#00E3C2]/30 transition-colors`}>
+                    <h3 className={`text-xl font-bold ${textColor} mb-4 flex items-center gap-2`}>
                       <Shield className="text-[#00E3C2]"/> Certifications
                     </h3>
                     <ul className="space-y-3">
                       {["Certified Penetration Tester (CPT)", "AWS Cloud Practitioner", "NPTEL Java Programming"].map((cert, i) => (
-                        <li key={i} className="flex items-center gap-3 text-[#C7D3DD] text-sm">
+                        <li key={i} className={`flex items-center gap-3 ${muteColor} text-sm`}>
                           <CheckCircle size={16} className="text-[#00E3C2] shrink-0"/> {cert}
                         </li>
                       ))}
@@ -658,19 +713,18 @@ const Portfolio = () => {
               {/* Skills Grid */}
               <div className="lg:col-span-7">
                 <Reveal>
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                  <h3 className={`text-xl font-bold ${textColor} mb-6 flex items-center gap-2`}>
                      <Cpu className="text-[#00E3C2]"/> Technical Stack
                    </h3>
                 </Reveal>
 
-                {/* AI Tip Box */}
                 <div className={`mb-6 transition-all duration-300 overflow-hidden ${activeSkillTip.tip ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'}`}>
-                   <div className="bg-[#00E3C2]/10 border border-[#00E3C2]/30 text-[#00E3C2] p-4 rounded-sm flex justify-between items-start">
+                   <div className={`bg-[#00E3C2]/10 border border-[#00E3C2]/30 text-[#00E3C2] p-4 rounded-sm flex justify-between items-start`}>
                       <div className="flex gap-3">
                         <Lightbulb className="shrink-0 text-[#00E3C2]" size={20} />
-                        <p className="text-sm text-[#C7D3DD]"><strong className="text-white block mb-1">Expert Insight:</strong> {activeSkillTip.tip}</p>
+                        <p className={`text-sm ${muteColor}`}><strong className={`${textColor} block mb-1`}>Expert Insight:</strong> {activeSkillTip.tip}</p>
                       </div>
-                      <button onClick={() => setActiveSkillTip({skill:'', tip:''})} className="hover:text-white"><X size={16}/></button>
+                      <button onClick={() => setActiveSkillTip({skill:'', tip:''})} className={`hover:${textColor}`}><X size={16}/></button>
                    </div>
                 </div>
 
@@ -681,16 +735,16 @@ const Portfolio = () => {
                       <Reveal key={idx} delay={idx * 50} animation="scale-up">
                         <div
                           onClick={() => handleSkillClick(skill.name)}
-                          className="bg-[#1A2634] hover:bg-[#081F2F] p-6 rounded-sm border border-[#1A2634] hover:border-[#00E3C2]/50 transition-all cursor-pointer group flex flex-col items-center gap-4 text-center h-full hover:-translate-y-1 shadow-md hover:shadow-[0_0_15px_rgba(0,227,194,0.1)]"
+                          className={`${cardBg} ${isDark ? 'hover:bg-[#081F2F]' : 'hover:bg-slate-50'} p-6 rounded-sm border ${borderColor} hover:border-[#00E3C2]/50 transition-all cursor-pointer group flex flex-col items-center gap-4 text-center h-full hover:-translate-y-1 shadow-md hover:shadow-[0_0_15px_rgba(0,227,194,0.1)]`}
                         >
-                           <div className="text-[#C7D3DD] group-hover:text-[#00E3C2] transition-colors">
+                           <div className={`${muteColor} group-hover:text-[#00E3C2] transition-colors`}>
                              {loadingSkill === skill.name ? <Loader2 className="animate-spin" size={32}/> : <Icon size={32} />}
                            </div>
                            <div>
-                             <h4 className="font-bold text-white text-sm tracking-wide">{skill.name}</h4>
+                             <h4 className={`font-bold ${textColor} text-sm tracking-wide`}>{skill.name}</h4>
                              <div className="flex gap-1 justify-center mt-3">
                                {[...Array(5)].map((_, i) => (
-                                 <div key={i} className={`h-1 w-4 rounded-full transition-colors ${i < skill.rating ? 'bg-[#00E3C2]' : 'bg-[#0B0F14]'}`}></div>
+                                 <div key={i} className={`h-1 w-4 rounded-full transition-colors ${i < skill.rating ? 'bg-[#00E3C2]' : isDark ? 'bg-[#0B0F14]' : 'bg-slate-300'}`}></div>
                                ))}
                              </div>
                            </div>
@@ -705,31 +759,30 @@ const Portfolio = () => {
         </section>
 
         {/* PROJECTS SECTION */}
-        <section id="projects" className="py-20 md:py-32 bg-[#0B0F14] relative">
+        <section id="projects" className={`py-20 md:py-32 ${isDark ? '' : 'bg-slate-50'} relative`}>
            <div className="container mx-auto px-5 sm:px-7 max-w-[80rem]">
             <Reveal>
               <div className="flex items-center gap-4 mb-16">
                 <span className="text-[#00E3C2] font-bold text-lg font-mono">04.</span>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">Latest Projects</h2>
-                <div className="h-px bg-[#1A2634] flex-1 ml-4"></div>
+                <h2 className={`text-3xl md:text-4xl font-bold ${textColor}`}>Latest Projects</h2>
+                <div className={`h-px ${isDark ? 'bg-[#1A2634]' : 'bg-slate-200'} flex-1 ml-4`}></div>
               </div>
             </Reveal>
 
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
               {RESUME_DATA.projects.map((project, idx) => (
                 <Reveal key={idx} delay={idx * 150} animation="fade-up">
-                  <div className="group flex flex-col h-full bg-[#1A2634] border border-[#1A2634] rounded-sm overflow-hidden hover:border-[#00E3C2]/30 transition-all duration-300 hover:shadow-xl hover:shadow-[#00E3C2]/10">
-                    <div className="relative h-48 bg-[#0B0F14] overflow-hidden flex items-center justify-center border-b border-[#1A2634]">
-                       {/* Placeholder Icons for Imagery */}
-                       <div className="text-[#C7D3DD]/50 group-hover:text-[#00E3C2] group-hover:scale-110 transition-all duration-500 opacity-50 group-hover:opacity-100">
+                  <div className={`group flex flex-col h-full ${cardBg} border ${borderColor} rounded-sm overflow-hidden hover:border-[#00E3C2]/30 transition-all duration-300 hover:shadow-xl hover:shadow-[#00E3C2]/10`}>
+                    <div className={`relative h-48 ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-200'} overflow-hidden flex items-center justify-center border-b ${borderColor}`}>
+                       <div className={`${isDark ? 'text-[#C7D3DD]/50' : 'text-slate-400'} group-hover:text-[#00E3C2] group-hover:scale-110 transition-all duration-500 opacity-50 group-hover:opacity-100`}>
                           {project.image === 'shield' && <Shield size={80} strokeWidth={1} />}
                           {project.image === 'terminal' && <Terminal size={80} strokeWidth={1} />}
                           {project.image === 'bot' && <Bot size={80} strokeWidth={1} />}
                           {project.image === 'cpu' && <Cpu size={80} strokeWidth={1} />}
                        </div>
 
-                       <div className="absolute inset-0 bg-[#0B0F14]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-                          <button className="px-6 py-2 bg-[#00E3C2] text-[#0B0F14] rounded-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2 shadow-lg">
+                       <div className={`absolute inset-0 ${isDark ? 'bg-[#0B0F14]/80' : 'bg-white/80'} opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm`}>
+                          <button className={`px-6 py-2 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} rounded-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2 shadow-lg`}>
                             View Details <ArrowRight size={16}/>
                           </button>
                        </div>
@@ -738,30 +791,30 @@ const Portfolio = () => {
                     <div className="p-6 flex-1 flex flex-col">
                        <div className="flex justify-between items-start mb-4">
                           <div>
-                             <h3 className="text-xl font-bold text-white group-hover:text-[#00E3C2] transition-colors">{project.title}</h3>
+                             <h3 className={`text-xl font-bold ${textColor} group-hover:text-[#00E3C2] transition-colors`}>{project.title}</h3>
                              <p className="text-xs font-bold text-[#00E3C2]/80 uppercase tracking-wider">{project.client}</p>
                           </div>
 
                           <button
                             onClick={(e) => {e.preventDefault(); handleProjectScan(idx, project)}}
                             disabled={loadingProject === idx}
-                            className="p-2 rounded-sm bg-[#0B0F14] border border-[#1A2634] hover:border-[#00E3C2] text-[#00E3C2] transition-colors"
+                            className={`p-2 rounded-sm ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-100'} border ${borderColor} hover:border-[#00E3C2] text-[#00E3C2] transition-colors`}
                             title="AI Analysis"
                           >
                             {loadingProject === idx ? <Loader2 size={18} className="animate-spin"/> : <ScanEye size={18}/>}
                           </button>
                        </div>
 
-                       <p className="text-[#C7D3DD] text-sm mb-6 flex-1 opacity-80">{project.desc}</p>
+                       <p className={`${muteColor} text-sm mb-6 flex-1 opacity-80`}>{project.desc}</p>
 
                        <div className="flex flex-wrap gap-2 mb-4">
                           {project.tags.map(tag => (
-                            <span key={tag} className="px-3 py-1 bg-[#0B0F14] border border-[#1A2634] text-[#C7D3DD] text-xs rounded-full group-hover:border-[#00E3C2]/30 transition-colors">{tag}</span>
+                            <span key={tag} className={`px-3 py-1 ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-100'} border ${borderColor} ${muteColor} text-xs rounded-full group-hover:border-[#00E3C2]/30 transition-colors`}>{tag}</span>
                           ))}
                        </div>
 
                        {projectInsights[idx] && (
-                          <div className="mt-auto p-4 bg-[#00E3C2]/10 text-[#C7D3DD] rounded-sm text-sm border border-[#00E3C2]/30 animate-in fade-in">
+                          <div className={`mt-auto p-4 bg-[#00E3C2]/10 ${muteColor} rounded-sm text-sm border border-[#00E3C2]/30 animate-in fade-in`}>
                              <div className="flex items-center gap-2 font-bold text-[#00E3C2] text-xs uppercase mb-1">
                                <Bot size={14} /> AI Analysis
                              </div>
@@ -776,64 +829,70 @@ const Portfolio = () => {
            </div>
         </section>
 
-        {/* CONTACT SECTION - UPDATED WITH FORMSUBMIT */}
-        <section id="contact" className="py-20 md:py-32 bg-[#0B0F14] relative">
+        {/* CONTACT SECTION */}
+        <section id="contact" className="py-20 md:py-32 relative">
           <div className="container mx-auto px-5 sm:px-7 max-w-[80rem]">
             <Reveal>
               <div className="flex items-center gap-4 mb-16 justify-center">
                 <span className="text-[#00E3C2] font-bold text-lg font-mono">05.</span>
-                <h2 className="text-3xl md:text-5xl font-bold text-white">Get In Touch</h2>
+                <h2 className={`text-3xl md:text-5xl font-bold ${textColor}`}>Get In Touch</h2>
               </div>
             </Reveal>
 
-            <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-0 bg-[#1A2634] rounded-sm overflow-hidden shadow-2xl border border-[#1A2634]">
+            <div className={`max-w-4xl mx-auto grid md:grid-cols-5 gap-0 ${cardBg} rounded-sm overflow-hidden shadow-2xl border ${borderColor}`}>
 
               {/* Contact Info Sidebar */}
-              <div className="md:col-span-2 bg-[#081F2F] p-8 text-white flex flex-col justify-between border-r border-[#1A2634]">
+              <div className={`md:col-span-2 ${isDark ? 'bg-[#081F2F]' : 'bg-slate-800'} p-8 text-white flex flex-col justify-between border-r ${borderColor}`}>
                  <div>
                    <h3 className="text-xl font-bold mb-6 text-[#00E3C2]">Contact Information</h3>
-                   <p className="text-[#C7D3DD] mb-8 text-sm opacity-80">Open to full-time opportunities and freelance projects. Let's build something secure.</p>
+                   <p className="text-slate-300 mb-8 text-sm opacity-80">Open to full-time opportunities and freelance projects. Let's build something secure.</p>
 
                    <div className="space-y-6">
                      <div className="flex items-start gap-4 group">
                        <Mail className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm break-all text-[#C7D3DD]">{RESUME_DATA.email}</div>
+                       <div className="text-sm break-all text-slate-300">{RESUME_DATA.email}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <Phone className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-[#C7D3DD]">{RESUME_DATA.phone}</div>
+                       <div className="text-sm text-slate-300">{RESUME_DATA.phone}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <MapPin className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-[#C7D3DD]">{RESUME_DATA.location}</div>
+                       <div className="text-sm text-slate-300">{RESUME_DATA.location}</div>
                      </div>
                    </div>
                  </div>
 
                  <div className="flex gap-4 mt-8">
-                    <a href="https://www.linkedin.com/in/elangovan4641477/" target="_blank" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-[#C7D3DD] transition-colors"><Linkedin size={18}/></a>
-                    <a href="https://github.com/Jarvis2024-hub" target="_blank" className="p-2 bg-[#1A2634] rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-[#C7D3DD] transition-colors"><Github size={18}/></a>
+                    <a href="https://www.linkedin.com/in/elangovan4641477/" target="_blank" rel="noreferrer" className={`p-2 ${isDark ? 'bg-[#1A2634]' : 'bg-slate-700'} rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors`}><Linkedin size={18}/></a>
+                    <a href="https://github.com/Jarvis2024-hub" target="_blank" rel="noreferrer" className={`p-2 ${isDark ? 'bg-[#1A2634]' : 'bg-slate-700'} rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors`}><Github size={18}/></a>
                  </div>
               </div>
 
               {/* Form */}
-              <div className="md:col-span-3 p-8 lg:p-12 bg-[#1A2634]">
+              <div className="md:col-span-3 p-8 lg:p-12">
 
                 {/* AI Feature */}
-                <div className="mb-8 p-4 bg-[#0B0F14] rounded-sm border border-[#1A2634]">
+                <div className={`mb-8 p-4 ${inputBg} rounded-sm border ${borderColor}`}>
                    <div className="flex items-center justify-between mb-3">
                      <span className="text-xs font-bold text-[#00E3C2] uppercase flex items-center gap-1"><Zap size={14}/> For Recruiters</span>
                    </div>
                    <div className="flex gap-2">
                       <input
                         type="text" placeholder="Company Name"
-                        className="flex-1 p-2 text-sm bg-[#1A2634] border border-[#1A2634] rounded-sm text-white focus:outline-none focus:border-[#00E3C2]"
+                        className={`flex-1 p-2 text-sm ${inputBg} border ${inputBorder} rounded-sm ${textColor} focus:outline-none focus:border-[#00E3C2]`}
                         value={draftContext.company}
                         onChange={(e) => setDraftContext({...draftContext, company: e.target.value})}
                       />
+                      <input
+                        type="text" placeholder="Role"
+                        className={`flex-1 p-2 text-sm ${inputBg} border ${inputBorder} rounded-sm ${textColor} focus:outline-none focus:border-[#00E3C2]`}
+                        value={draftContext.role}
+                        onChange={(e) => setDraftContext({...draftContext, role: e.target.value})}
+                      />
                       <button
                         onClick={handleMagicDraft} disabled={isDrafting}
-                        className="px-4 py-2 bg-[#00E3C2] text-[#0B0F14] text-xs font-bold rounded-sm hover:bg-[#00c4a7] transition-colors flex items-center gap-2"
+                        className={`px-4 py-2 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} text-xs font-bold rounded-sm hover:bg-[#00c4a7] transition-colors flex items-center gap-2`}
                       >
                          {isDrafting ? <Loader2 size={14} className="animate-spin"/> : <Sparkles size={14}/>}
                          <span>Magic Draft</span>
@@ -847,47 +906,47 @@ const Portfolio = () => {
                       <div className="w-16 h-16 bg-[#00E3C2] rounded-full flex items-center justify-center mx-auto mb-4">
                          <CheckCircle size={32} className="text-[#0B0F14]"/>
                       </div>
-                      <h3 className="text-xl font-bold text-white mb-2">Message Sent!</h3>
-                      <p className="text-[#C7D3DD] mb-4">Thanks for reaching out. I'll get back to you shortly.</p>
+                      <h3 className={`text-xl font-bold ${textColor} mb-2`}>Message Sent!</h3>
+                      <p className={`${muteColor} mb-4`}>Thanks for reaching out. I'll get back to you shortly.</p>
                       <button onClick={() => setIsFormSubmitted(false)} className="text-[#00E3C2] font-bold hover:underline text-sm">Send another message</button>
                    </div>
                 ) : (
                   <form onSubmit={handleContactSubmit} className="space-y-6">
                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Name</label>
+                          <label className={`text-xs font-bold ${muteColor} uppercase mb-1 block`}>Name</label>
                           <input
                             type="text"
                             name="name"
                             required
-                            className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
+                            className={`w-full p-3 ${inputBg} border-b-2 ${inputBorder} focus:border-[#00E3C2] ${textColor} outline-none transition-all ${inputPlaceholder}`}
                             placeholder="John Doe"
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Email</label>
+                          <label className={`text-xs font-bold ${muteColor} uppercase mb-1 block`}>Email</label>
                           <input
                             type="email"
                             name="email"
                             required
-                            className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all placeholder-[#1A2634]"
+                            className={`w-full p-3 ${inputBg} border-b-2 ${inputBorder} focus:border-[#00E3C2] ${textColor} outline-none transition-all ${inputPlaceholder}`}
                             placeholder="john@example.com"
                           />
                         </div>
                      </div>
                      <div>
-                        <label className="text-xs font-bold text-[#C7D3DD] uppercase mb-1 block">Message</label>
+                        <label className={`text-xs font-bold ${muteColor} uppercase mb-1 block`}>Message</label>
                         <textarea
                           name="message"
                           required
                           rows={4}
-                          className="w-full p-3 bg-[#0B0F14] border-b-2 border-[#1A2634] focus:border-[#00E3C2] text-white outline-none transition-all resize-none placeholder-[#1A2634]"
+                          className={`w-full p-3 ${inputBg} border-b-2 ${inputBorder} focus:border-[#00E3C2] ${textColor} outline-none transition-all resize-none ${inputPlaceholder}`}
                           placeholder="Project details..."
                           value={contactMessage}
                           onChange={(e) => setContactMessage(e.target.value)}
                         />
                      </div>
-                     <button type="submit" disabled={isSubmittingForm} className="w-full py-3 bg-[#00E3C2] text-[#0B0F14] font-bold rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.2)] hover:shadow-[0_0_30px_rgba(0,227,194,0.4)] hover:scale-[1.02] transition-all flex justify-center items-center gap-2 uppercase tracking-wide text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                     <button type="submit" disabled={isSubmittingForm} className={`w-full py-3 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} font-bold rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.2)] hover:shadow-[0_0_30px_rgba(0,227,194,0.4)] hover:scale-[1.02] transition-all flex justify-center items-center gap-2 uppercase tracking-wide text-sm disabled:opacity-50 disabled:cursor-not-allowed`}>
                         {isSubmittingForm ? <Loader2 size={18} className="animate-spin"/> : <Send size={18}/>}
                         {isSubmittingForm ? 'Sending...' : 'Send Message'}
                      </button>
@@ -902,7 +961,7 @@ const Portfolio = () => {
       </main>
 
       {/* FOOTER */}
-      <footer className="py-8 bg-[#0B0F14] text-center border-t border-[#1A2634] text-[#C7D3DD] text-sm">
+      <footer className={`py-8 ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-100'} text-center border-t ${borderColor} ${muteColor} text-sm`}>
          <p>© {new Date().getFullYear()} Elangovan P. <span className="text-[#00E3C2]">System Secure</span>.</p>
       </footer>
 
@@ -911,20 +970,20 @@ const Portfolio = () => {
       {/* Job Fit Modal */}
       {showJobModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="glass rounded-sm w-full max-w-lg shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-300 border border-[#1A2634]">
-            <div className="bg-[#1A2634] p-6 flex justify-between items-center text-white border-b border-[#0B0F14]">
+          <div className={`glass ${isDark ? 'glass-dark' : 'glass-light'} rounded-sm w-full max-w-lg shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-300 border ${borderColor}`}>
+            <div className={`${isDark ? 'bg-[#1A2634]' : 'bg-slate-100'} p-6 flex justify-between items-center ${textColor} border-b ${borderColor}`}>
               <h3 className="font-bold text-lg flex items-center gap-2 text-[#00E3C2]"><Briefcase size={20}/> AI Job Matcher</h3>
               <button onClick={() => setShowJobModal(false)} className="hover:text-[#00E3C2] transition-colors"><X size={24}/></button>
             </div>
-            <div className="p-8 bg-[#0B0F14]">
+            <div className={`p-8 ${inputBg}`}>
               <textarea
-                className="w-full p-4 bg-[#1A2634] border border-[#1A2634] rounded-sm mb-6 h-32 focus:outline-none focus:border-[#00E3C2] transition-all text-sm text-white placeholder-[#C7D3DD]/30"
+                className={`w-full p-4 ${isDark ? 'bg-[#1A2634]' : 'bg-white'} border ${inputBorder} rounded-sm mb-6 h-32 focus:outline-none focus:border-[#00E3C2] transition-all text-sm ${textColor} ${inputPlaceholder}`}
                 placeholder="Paste Job Description here..."
                 value={jobDesc}
                 onChange={(e) => setJobDesc(e.target.value)}
               />
               {jobAnalysis && (
-                <div className="bg-[#00E3C2]/10 border border-[#00E3C2]/30 rounded-sm p-4 mb-6 text-sm text-[#C7D3DD] animate-in slide-in-from-bottom-2">
+                <div className={`bg-[#00E3C2]/10 border border-[#00E3C2]/30 rounded-sm p-4 mb-6 text-sm ${muteColor} animate-in slide-in-from-bottom-2`}>
                   <div className="flex items-center gap-2 font-bold text-[#00E3C2] mb-2"><Sparkles size={16}/> Match Report</div>
                   <div className="whitespace-pre-line">{jobAnalysis}</div>
                 </div>
@@ -932,7 +991,7 @@ const Portfolio = () => {
               <button
                 onClick={handleJobAnalysis}
                 disabled={isAnalyzingJob || !jobDesc}
-                className="w-full py-3 bg-[#00E3C2] text-[#0B0F14] rounded-sm font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(0,227,194,0.3)] uppercase tracking-wide text-sm"
+                className={`w-full py-3 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} rounded-sm font-bold hover:brightness-110 transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(0,227,194,0.3)] uppercase tracking-wide text-sm`}
               >
                 {isAnalyzingJob ? <Loader2 size={20} className="animate-spin"/> : <CheckCircle size={20}/>}
                 {isAnalyzingJob ? 'Processing...' : 'Analyze Fit'}
@@ -945,49 +1004,49 @@ const Portfolio = () => {
       {/* Floating Chat */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
         {isChatOpen && (
-          <div className="glass rounded-sm shadow-2xl w-80 sm:w-96 mb-6 overflow-hidden border border-[#1A2634] flex flex-col h-[500px] animate-in slide-in-from-bottom-10 zoom-in-95 duration-300">
-            <div className="bg-[#1A2634] p-4 text-white flex justify-between items-center shadow-md border-b border-[#0B0F14]">
+          <div className={`glass ${isDark ? 'glass-dark' : 'glass-light'} rounded-sm shadow-2xl w-80 sm:w-96 mb-6 overflow-hidden border ${borderColor} flex flex-col h-[500px] animate-in slide-in-from-bottom-10 zoom-in-95 duration-300`}>
+            <div className={`${isDark ? 'bg-[#1A2634]' : 'bg-slate-100'} p-4 ${textColor} flex justify-between items-center shadow-md border-b ${borderColor}`}>
               <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 bg-[#00E3C2] rounded-full flex items-center justify-center text-[#0B0F14]"><Bot size={18} /></div>
+                 <div className={`w-8 h-8 bg-[#00E3C2] rounded-full flex items-center justify-center ${isDark ? 'text-[#0B0F14]' : 'text-white'}`}><Bot size={18} /></div>
                  <div>
                     <h3 className="font-bold text-sm">Elangovan AI</h3>
-                    <p className="text-[10px] text-[#C7D3DD] flex items-center gap-1"><span className="w-1.5 h-1.5 bg-[#00E3C2] rounded-full animate-pulse"></span> Online</p>
+                    <p className={`text-[10px] ${muteColor} flex items-center gap-1`}><span className="w-1.5 h-1.5 bg-[#00E3C2] rounded-full animate-pulse"></span> Online</p>
                  </div>
               </div>
               <button onClick={() => setIsChatOpen(false)}><X size={18} /></button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0B0F14]">
+            <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${inputBg}`}>
               {messages.map((msg, idx) => (
                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] p-3 rounded-sm text-sm shadow-sm ${msg.role === 'user' ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-[#1A2634] border border-[#1A2634] text-[#C7D3DD]'}`}>
+                  <div className={`max-w-[85%] p-3 rounded-sm text-sm shadow-sm ${msg.role === 'user' ? 'bg-[#00E3C2] text-[#0B0F14]' : `${cardBg} border ${borderColor} ${textColor}`}`}>
                     {msg.text}
                   </div>
                 </div>
               ))}
-              {isGenerating && <div className="flex justify-start"><div className="bg-[#1A2634] p-3 rounded-sm shadow-sm"><Loader2 size={16} className="animate-spin text-[#00E3C2]"/></div></div>}
+              {isGenerating && <div className="flex justify-start"><div className={`${cardBg} p-3 rounded-sm shadow-sm`}><Loader2 size={16} className="animate-spin text-[#00E3C2]"/></div></div>}
               <div ref={chatEndRef} />
             </div>
-            
-            <form onSubmit={handleSendMessage} className="p-3 bg-[#1A2634] border-t border-[#0B0F14] flex gap-2">
-              <input 
-                type="text" 
-                placeholder="Ask me anything..." 
-                className="flex-1 bg-[#0B0F14] border-transparent focus:bg-[#0B0F14] focus:border-[#00E3C2] border focus:ring-1 focus:ring-[#00E3C2] rounded-sm px-4 py-2 text-sm text-white outline-none transition-all placeholder-[#C7D3DD]/30" 
-                value={inputValue} 
-                onChange={(e) => setInputValue(e.target.value)} 
+
+            <form onSubmit={handleSendMessage} className={`p-3 ${isDark ? 'bg-[#1A2634]' : 'bg-slate-100'} border-t ${borderColor} flex gap-2`}>
+              <input
+                type="text"
+                placeholder="Ask me anything..."
+                className={`flex-1 ${inputBg} border-transparent focus:${inputBg} focus:border-[#00E3C2] border focus:ring-1 focus:ring-[#00E3C2] rounded-sm px-4 py-2 text-sm ${textColor} outline-none transition-all ${inputPlaceholder}`}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
               />
-              <button type="submit" disabled={isGenerating || !inputValue.trim()} className="bg-[#00E3C2] text-[#0B0F14] w-9 h-9 rounded-sm flex items-center justify-center hover:bg-[#00c4a7] transition-all">
+              <button type="submit" disabled={isGenerating || !inputValue.trim()} className={`bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} w-9 h-9 rounded-sm flex items-center justify-center hover:bg-[#00c4a7] transition-all`}>
                 <Send size={16} />
               </button>
             </form>
           </div>
         )}
-        
+
         {!isChatOpen && (
-          <button 
-            onClick={() => setIsChatOpen(true)} 
-            className="group flex items-center gap-2 bg-[#00E3C2] text-[#0B0F14] pl-4 pr-5 py-3 rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.4)] hover:brightness-110 transition-all duration-300 z-50 hover:-translate-y-1 font-bold tracking-wide uppercase text-sm"
+          <button
+            onClick={() => setIsChatOpen(true)}
+            className={`group flex items-center gap-2 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} pl-4 pr-5 py-3 rounded-sm shadow-[0_0_20px_rgba(0,227,194,0.4)] hover:brightness-110 transition-all duration-300 z-50 hover:-translate-y-1 font-bold tracking-wide uppercase text-sm`}
           >
             <Bot size={24} className="animate-bounce"/>
             <span>Chat with AI</span>
