@@ -380,7 +380,7 @@ const Portfolio = () => {
 
   // --- API HELPER ---
   const callGemini = async (prompt, systemInstruction = "") => {
-    const apiKey = ""; // Runtime provided
+    const apiKey = "AIzaSyDSW_Pi5gNIeN0mqBGiJUKqVeWrshBLoTM"; // Runtime provided
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
