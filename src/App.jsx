@@ -5,7 +5,7 @@ import {
   Cpu, Globe, MapPin, Send, X, Sparkles, Loader2, 
   Bot, ScanEye, Briefcase, CheckCircle, Lightbulb,
   ChevronRight, ArrowRight, Zap, Play, Layers,
-  Sun, Moon
+  Sun, Moon, Menu
 } from 'lucide-react';
 
 // --- DATA CONTEXT ---
@@ -199,6 +199,120 @@ const Typewriter = ({ words, className }) => {
   );
 };
 
+// --- INTERACTIVE CONSTELLATION BACKGROUND ---
+const ConstellationBackground = ({ theme }) => {
+  const canvasRef = useRef(null);
+  const mouseRef = useRef({ x: -9999, y: -9999 });
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    const handleMouseMove = (e) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const particles = [];
+    const particleCount = 70; // Adjust for density
+    const connectionDistance = 140;
+    const mouseInteractionDistance = 200; // Distance to connect to mouse
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 2 + 1
+      });
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      const isDark = theme === 'dark';
+      // Teal colors
+      const colorStr = isDark ? '0, 227, 194' : '15, 118, 110';
+
+      particles.forEach((p, i) => {
+        // Update position (automatic roaming)
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Bounce off edges
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        // Mouse interaction: Connect to mouse
+        const dxMouse = p.x - mouseRef.current.x;
+        const dyMouse = p.y - mouseRef.current.y;
+        const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+
+        if (distMouse < mouseInteractionDistance) {
+            // Draw line to mouse
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(${colorStr}, ${0.5 * (1 - distMouse / mouseInteractionDistance)})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(mouseRef.current.x, mouseRef.current.y);
+            ctx.stroke();
+
+            // Gentle attraction to mouse
+            const force = (mouseInteractionDistance - distMouse) / mouseInteractionDistance;
+            const angle = Math.atan2(dyMouse, dxMouse);
+            // Move slightly towards mouse
+            p.x -= Math.cos(angle) * force * 0.5;
+            p.y -= Math.sin(angle) * force * 0.5;
+        }
+
+        // Draw particle
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${colorStr}, 0.6)`;
+        ctx.fill();
+
+        // Connect lines between particles
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < connectionDistance) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(${colorStr}, ${0.2 * (1 - dist / connectionDistance)})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      });
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [theme]);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />;
+};
+
+
 const Portfolio = () => {
   // --- STATE ---
   const [activeSection, setActiveSection] = useState('home');
@@ -210,6 +324,9 @@ const Portfolio = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const chatEndRef = useRef(null);
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
+
+  // Mobile Menu State (Hover based)
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
 
   // Gemini Features State
   const [draftContext, setDraftContext] = useState({ company: '', role: '' });
@@ -223,10 +340,23 @@ const Portfolio = () => {
   const [isAnalyzingJob, setIsAnalyzingJob] = useState(false);
   const [activeSkillTip, setActiveSkillTip] = useState({ skill: '', tip: '' });
   const [loadingSkill, setLoadingSkill] = useState('');
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // Contact Form State
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+  // Parallax Effect
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth) * 20 - 10,
+        y: (e.clientY / window.innerHeight) * 20 - 10
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   // Scroll Spy
   useEffect(() => {
@@ -250,7 +380,7 @@ const Portfolio = () => {
 
   // --- API HELPER ---
   const callGemini = async (prompt, systemInstruction = "") => {
-    const apiKey = ""; // Runtime provided - ADD YOUR KEY HERE
+    const apiKey = ""; // Runtime provided
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
@@ -276,6 +406,7 @@ const Portfolio = () => {
   const scrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
+    setIsMenuHovered(false); // Close mobile menu on click
   };
 
   const handleSendMessage = async (e) => {
@@ -400,56 +531,21 @@ const Portfolio = () => {
         ::-webkit-scrollbar-track { background: ${isDark ? '#0B0F14' : '#F8FAFC'}; }
         ::-webkit-scrollbar-thumb { background: #00E3C2; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #00b399; }
-
-        @keyframes roam {
-            0% { transform: translate(0, 0); opacity: 0; }
-            20% { opacity: 0.8; }
-            80% { opacity: 0.8; }
-            100% { transform: translate(100px, -100px); opacity: 0; }
-        }
-        .galaxy-star {
-            position: fixed;
-            background: #00E3C2;
-            border-radius: 50%;
-            z-index: 0;
-            pointer-events: none;
-        }
       `}</style>
 
-      {/* BACKGROUND (Conditionally rendered or styled) */}
-      <div className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-700">
-         {/* Subtle Texture for Light Mode */}
-         {!isDark && (
-             <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#CBD5E1 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-         )}
-         {/* Stars - always there but maybe less visible in light mode */}
-         {[...Array(60)].map((_, i) => (
-           <div
-             key={i}
-             className="galaxy-star"
-             style={{
-                width: Math.random() * 3 + 'px',
-                height: Math.random() * 3 + 'px',
-                top: Math.random() * 100 + '%',
-                left: Math.random() * 100 + '%',
-                animation: `roam ${Math.random() * 20 + 10}s linear infinite`,
-                animationDelay: `${Math.random() * 10}s`,
-                opacity: isDark ? (Math.random() * 0.5 + 0.1) : (Math.random() * 0.3 + 0.1),
-                backgroundColor: isDark ? '#00E3C2' : '#0F766E' // Darker teal stars in light mode
-             }}
-           ></div>
-        ))}
-      </div>
+      {/* CONSTELLATION BACKGROUND */}
+      <ConstellationBackground theme={theme} />
 
       {/* HEADER */}
       <header className={`fixed top-0 left-0 w-full z-50 py-4 transition-all duration-300 border-b ${isDark ? 'glass-dark border-[#1A2634]' : 'glass-light border-slate-200'}`}>
-        <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] flex justify-between items-center">
+        <div className="container mx-auto px-5 sm:px-7 max-w-[80rem] flex justify-between items-center relative">
           <div onClick={() => scrollTo('home')} className="cursor-pointer group flex items-center gap-3">
              <div className={`w-10 h-10 ${isDark ? 'bg-[#00E3C2] text-[#0B0F14]' : 'bg-teal-600 text-white'} flex items-center justify-center font-bold text-lg rounded-sm shadow-[0_0_15px_rgba(0,227,194,0.3)] transform group-hover:rotate-45 transition-all duration-300`}>EP</div>
              <span className={`font-bold text-lg ${isDark ? 'text-white' : 'text-slate-800'} tracking-widest hidden sm:block group-hover:text-[#00E3C2] transition-colors`}>ELANGOVAN</span>
           </div>
 
           <div className="flex items-center gap-6">
+            {/* Desktop Navigation */}
             <nav className={`hidden md:flex gap-8 text-sm font-medium ${navText}`}>
               {['About', 'Experience', 'Skills', 'Projects', 'Contact'].map((item) => (
                 <button
@@ -463,22 +559,52 @@ const Portfolio = () => {
               ))}
             </nav>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-full transition-colors ${isDark ? 'bg-[#1A2634] text-yellow-400 hover:bg-[#253241]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
-              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            {/* Theme Toggle & CV (Moved to Header for Mobile too) */}
+            <div className={`flex items-center gap-3 ${isDark ? '' : ''}`}>
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-full transition-colors ${isDark ? 'bg-[#1A2634] text-yellow-400 hover:bg-[#253241]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
 
-            <a
-              href="/resume.pdf"
-              download="Elangovan_Resume.pdf"
-              className={`py-2.5 px-6 ${isDark ? 'bg-[#1A2634] text-[#00E3C2] border-[#00E3C2]/30' : 'bg-teal-600 text-white border-teal-600'} border rounded-sm hover:bg-[#00E3C2] hover:text-[#0B0F14] transition-all duration-300 flex items-center gap-2 text-sm font-bold shadow-lg hidden sm:flex group tracking-wider`}
+              <a
+                href="/resume.pdf"
+                download="Elangovan_Resume.pdf"
+                className={`py-2 px-4 ${isDark ? 'bg-[#1A2634] text-[#00E3C2] border-[#00E3C2]/30' : 'bg-teal-600 text-white border-teal-600'} border rounded-sm hover:bg-[#00E3C2] hover:text-[#0B0F14] transition-all duration-300 flex items-center gap-2 text-xs font-bold shadow-lg group tracking-wider`}
+              >
+                CV <Download size={14} className="group-hover:translate-y-1 transition-transform"/>
+              </a>
+            </div>
+
+            {/* Mobile Hamburger Menu (Hover-based) */}
+            <div
+              className="md:hidden relative"
+              onMouseEnter={() => setIsMenuHovered(true)}
+              onMouseLeave={() => setIsMenuHovered(false)}
             >
-              Download CV <Download size={16} className="group-hover:translate-y-1 transition-transform"/>
-            </a>
+              <button className={`p-2 rounded-lg ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                <Menu size={24} />
+              </button>
+
+              {/* Dropdown Menu */}
+              <div
+                className={`absolute top-full right-0 w-48 pt-2 transform transition-all duration-300 origin-top-right ${isMenuHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+              >
+                <div className={`${isDark ? 'bg-[#0B0F14] border-[#1A2634]' : 'bg-white border-slate-200'} border rounded-xl shadow-2xl p-2 flex flex-col gap-1 backdrop-blur-xl`}>
+                  {['About', 'Experience', 'Skills', 'Projects', 'Contact'].map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => scrollTo(item.toLowerCase())}
+                      className={`text-left py-2 px-4 rounded-lg text-sm font-medium transition-colors ${isDark ? 'text-slate-300 hover:bg-[#1A2634] hover:text-[#00E3C2]' : 'text-slate-600 hover:bg-slate-100 hover:text-teal-600'}`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -505,13 +631,14 @@ const Portfolio = () => {
 
                 <Reveal animation="fade-up" delay={100}>
                   <div className="space-y-2">
-                    <p className={`text-sm sm:text-base font-bold tracking-widest uppercase mb-1 ${isDark ? 'text-[#00E3C2]' : 'text-teal-600'}`}>I'm</p>
-                    {/* UPDATED: Decreased Name Size slightly */}
-                    <h1 className={`text-6xl sm:text-7xl xl:text-8xl font-extrabold leading-tight tracking-tighter ${isDark ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-600' : 'text-teal-900'} drop-shadow-sm pb-2`}>
+                    <p className={`text-2xl sm:text-3xl font-bold tracking-tight mb-0 ${isDark ? 'text-[#00E3C2]' : 'text-teal-600'}`}>
+                      Hi, I'm
+                    </p>
+
+                    <h1 className={`text-5xl sm:text-6xl xl:text-7xl font-extrabold leading-normal tracking-tighter ${isDark ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-600' : 'text-teal-900'} drop-shadow-sm pb-4`}>
                       Elangovan
                     </h1>
 
-                    {/* UPDATED: Increased Role Size, Highlighted Color, Same Font Family for "I'm" style */}
                     <h2 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-[#00E3C2]' : 'text-teal-600'} h-[1.2em] tracking-wide mt-2 flex items-center gap-2`}>
                       <Typewriter className={isDark ? 'text-[#00E3C2]' : 'text-teal-600'} words={["Certified Penetration Tester", "Cybersecurity Researcher", "Cyber Enthusiast"]} />
                     </h2>
