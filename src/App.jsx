@@ -380,7 +380,32 @@ const Portfolio = () => {
 
   // --- API HELPER ---
   const callGemini = async (prompt, systemInstruction = "") => {
-    const apiKey = "AIzaSyDSW_Pi5gNIeN0mqBGiJUKqVeWrshBLoTM"; // Runtime provided
+    // IMPORTANT: REPLACE THIS WITH YOUR VALID API KEY FROM GOOGLE AI STUDIO
+    const apiKey = "AIzaSyAyvzYYBXE-LTiSw9wAdR-xSLWbY3pnwvk";
+
+    if (!apiKey) {
+      console.warn("API Key missing. Using mock response.");
+      // Simulate network delay for mock response
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Fallback/Mock responses based on prompt keywords to prevent crash
+      const lowerPrompt = prompt.toLowerCase();
+      if (lowerPrompt.includes('email') || lowerPrompt.includes('draft')) {
+         return `Subject: Interview for ${draftContext.role || 'Cybersecurity Role'}\n\nHi Elangovan,\n\nI came across your portfolio and was impressed by your CPT certification and internship at Redynox. We're looking for a skilled professional like you at ${draftContext.company || 'our company'}. Are you available for a brief chat this week?\n\nBest,\nRecruiting Team`;
+      }
+      if (lowerPrompt.includes('analyze') || lowerPrompt.includes('insight')) {
+         return "Insight: This project demonstrates strong proficiency in secure coding practices and threat modeling. A key technical challenge likely involved ensuring real-time data integrity while handling concurrent user sessions.";
+      }
+      if (lowerPrompt.includes('compare') || lowerPrompt.includes('resume')) {
+         return "Match Score: 85%\n\nKey Strengths: Penetration Testing, Python scripting, AWS Fundamentals.\n\nWhy He Fits: Elangovan's background in both offensive security (CPT) and cloud basics aligns well with this role.";
+      }
+      if (lowerPrompt.includes('tip')) {
+         return "Pro Tip: Always validate input on both client and server sides to prevent injection attacks.";
+      }
+
+      return "I'm Elangovan's AI assistant. I can tell you about his skills in Penetration Testing, Python, and his experience with tools like Burp Suite. What would you like to know?";
+    }
+
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
@@ -398,7 +423,7 @@ const Portfolio = () => {
       return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't process that.";
     } catch (error) {
       console.error(error);
-      return "System error: Unable to contact AI endpoints.";
+      return "System error: Unable to contact AI endpoints. Please check API key.";
     }
   };
 
@@ -531,6 +556,40 @@ const Portfolio = () => {
         ::-webkit-scrollbar-track { background: ${isDark ? '#0B0F14' : '#F8FAFC'}; }
         ::-webkit-scrollbar-thumb { background: #00E3C2; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #00b399; }
+
+        @keyframes roam {
+            0% { transform: translate(0, 0); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translate(100px, -100px); opacity: 0; }
+        }
+        .galaxy-star {
+            position: fixed;
+            background: #00E3C2;
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Cyber Pattern Background */
+        .cyber-grid {
+            background-image: linear-gradient(rgba(0, 227, 194, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 227, 194, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .circuit-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #00E3C2, transparent);
+            height: 1px;
+            width: 100px;
+            opacity: 0;
+            animation: circuit 3s infinite linear;
+        }
+        @keyframes circuit {
+            0% { transform: translateX(-100%) scaleX(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateX(200%) scaleX(1); opacity: 0; }
+        }
       `}</style>
 
       {/* CONSTELLATION BACKGROUND */}
