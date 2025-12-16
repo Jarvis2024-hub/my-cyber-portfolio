@@ -367,7 +367,34 @@ const Portfolio = () => {
 
   // --- API HELPER ---
   const callGemini = async (prompt, systemInstruction = "") => {
-    const apiKey = ""; // Runtime provided - ADD YOUR KEY HERE
+    const apiKey = import.meta.env.VITE_API_KEY; // Runtime provided - ADD YOUR KEY HERE
+
+    // FIX: Fallback logic if API key is missing
+    if (!apiKey) {
+      console.warn("API Key missing. Using mock response.");
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const lowerPrompt = prompt.toLowerCase();
+      // Magic Draft Mock
+      if (lowerPrompt.includes('email') || lowerPrompt.includes('draft')) {
+         return `Subject: Interview for ${draftContext.role || 'Cybersecurity Role'} - Elangovan P\n\nHi Elangovan,\n\nI'm reaching out from ${draftContext.company || 'our company'}. We were impressed by your CPT certification and internship at Redynox. We're looking for a skilled professional like you. Are you available for a brief chat this week to discuss potential opportunities?\n\nBest regards,\nHiring Team`;
+      }
+      // Project Scan Mock
+      if (lowerPrompt.includes('analyze') || lowerPrompt.includes('insight')) {
+         return "Insight: This project demonstrates proficiency in secure coding and threat modeling. Key challenges likely involved handling real-time data securely and preventing injection attacks.";
+      }
+      // Job Fit Mock
+      if (lowerPrompt.includes('compare') || lowerPrompt.includes('resume')) {
+         return "Match Score: 85%\n\nKey Strengths: Penetration Testing, Python scripting, AWS Fundamentals.\n\nWhy He Fits: Elangovan's background in offensive security (CPT) aligns well with the technical requirements.";
+      }
+      // Skill Tip Mock
+      if (lowerPrompt.includes('tip')) {
+         return "Pro Tip: Always validate input on both client and server sides to prevent common vulnerabilities like XSS and SQLi.";
+      }
+      // Chat Mock
+      return "I am Elangovan's AI assistant. I can tell you about his skills in Penetration Testing, Python, and his experience with tools like Burp Suite. What would you like to know?";
+    }
+
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
@@ -385,7 +412,7 @@ const Portfolio = () => {
       return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't process that.";
     } catch (error) {
       console.error(error);
-      return "System error: Unable to contact AI endpoints.";
+      return "System error: Unable to contact AI endpoints. Please check API key.";
     }
   };
 
@@ -621,12 +648,11 @@ const Portfolio = () => {
                     <p className={`text-2xl sm:text-3xl font-bold tracking-tight mb-0 ${isDark ? 'text-[#00E3C2]' : 'text-teal-600'}`}>
                       Hi, I'm
                     </p>
-                    {/* UPDATED: Decreased Name Size slightly */}
+
                     <h1 className={`text-5xl sm:text-6xl xl:text-7xl font-extrabold leading-normal tracking-tighter ${isDark ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-600' : 'text-teal-900'} drop-shadow-sm pb-4`}>
                       Elangovan
                     </h1>
 
-                    {/* UPDATED: Increased Role Size & Highlighted Color */}
                     <h2 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-[#00E3C2]' : 'text-teal-600'} h-[1.2em] tracking-wide mt-2 flex items-center gap-2`}>
                       <Typewriter className={isDark ? 'text-[#00E3C2]' : 'text-teal-600'} words={["Certified Penetration Tester", "Cybersecurity Researcher", "Cyber Enthusiast"]} />
                     </h2>
