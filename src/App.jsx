@@ -428,7 +428,7 @@ const Portfolio = () => {
 
   // --- API HELPER ---
   const callGemini = async (prompt, systemInstruction = "") => {
-    const apiKey = "import.meta.env.VITE_API_KEY"; // Runtime provided
+    const apiKey = import.meta.env.VITE_API_KEY; // Runtime provided
 
     // FIX: Fallback logic if API key is missing
     if (!apiKey) {
