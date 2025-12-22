@@ -8,6 +8,23 @@ import {
   Sun, Moon, Menu
 } from 'lucide-react';
 
+// --- THEME ORB COMPONENT ---
+const ThemeOrb = ({ isAnimating, isDark }) => {
+  if (!isAnimating) return null;
+
+  return (
+    <div
+      className={`fixed z-[100] pointer-events-none w-4 h-4 md:w-6 md:h-6 rounded-full shadow-[0_0_15px_3px]
+        ${isDark ? 'bg-slate-200 shadow-slate-100/60' : 'bg-[#00E3C2] shadow-[#00E3C2]/60'}
+        animate-orb-fly`}
+      style={{
+        top: '24px', // Aligned with header button
+        right: '90px', // Aligned near the toggle button
+      }}
+    />
+  );
+};
+
 // --- DATA CONTEXT ---
 const RESUME_DATA = {
   name: "Elangovan",
@@ -153,6 +170,37 @@ const Reveal = ({ children, className = "", delay = 0, animation = "fade-up" }) 
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
+    </div>
+  );
+};
+
+// --- SKILL BAR COMPONENT ---
+const SkillBar = ({ rating, isDark }) => {
+  const [width, setWidth] = useState(0);
+  const [ref, isVisible] = useReveal(0.1);
+
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        setWidth((rating / 5) * 100);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, rating]);
+
+  return (
+    <div ref={ref} className="w-full mt-3">
+        <div className={`h-2 w-full rounded-sm ${isDark ? 'bg-[#0B0F14] border border-[#1A2634]' : 'bg-slate-200'} overflow-hidden`}>
+             <div
+                className={`h-full rounded-sm transition-all duration-1000 ease-out ${isDark ? 'bg-[#00E3C2]' : 'bg-teal-600'}`}
+                style={{ width: `${width}%` }}
+             />
+        </div>
+        <div className="flex justify-end mt-1.5">
+            <span className={`text-[11px] font-medium tracking-wide ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {rating * 20}%
+            </span>
+        </div>
     </div>
   );
 };
@@ -324,6 +372,7 @@ const Portfolio = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const chatEndRef = useRef(null);
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
+  const [isThemeAnimating, setIsThemeAnimating] = useState(false); // New state for Orb Animation
 
   // Mobile Menu State (Hover based)
   const [isMenuHovered, setIsMenuHovered] = useState(false);
@@ -362,12 +411,24 @@ const Portfolio = () => {
   }, []);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    if (isThemeAnimating) return; // Prevent double clicks
+    setIsThemeAnimating(true);
+
+    // Trigger the actual theme switch slightly after the orb starts moving
+    // so it looks like the orb "paints" the new theme or travels with it.
+    setTimeout(() => {
+        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    }, 200);
+
+    // Reset animation state after it completes
+    setTimeout(() => {
+        setIsThemeAnimating(false);
+    }, 750);
   };
 
   // --- API HELPER ---
   const callGemini = async (prompt, systemInstruction = "") => {
-    const apiKey = import.meta.env.VITE_API_KEY; // Runtime provided - ADD YOUR KEY HERE
+    const apiKey = "import.meta.env.VITE_API_KEY"; // Runtime provided
 
     // FIX: Fallback logic if API key is missing
     if (!apiKey) {
@@ -519,7 +580,7 @@ const Portfolio = () => {
 
   // --- RENDER ---
   return (
-    <div className={`min-h-screen ${bgColor} font-sans ${textColor} selection:bg-[#00E3C2] selection:text-[#0B0F14] overflow-x-hidden transition-colors duration-500`}>
+    <div className={`min-h-screen ${bgColor} font-sans ${textColor} selection:bg-[#00E3C2] selection:text-[#0B0F14] overflow-x-hidden transition-colors duration-700`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         html { scroll-behavior: smooth; }
@@ -527,6 +588,25 @@ const Portfolio = () => {
 
         :root {
           --teal: #00E3C2;
+        }
+
+        @keyframes orb-fly {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          40% {
+             transform: translate(-50vw, 20vh) scale(1.3);
+             opacity: 1;
+          }
+          100% {
+            transform: translate(-100vw, 50vh) scale(0.2);
+            opacity: 0;
+          }
+        }
+
+        .animate-orb-fly {
+          animation: orb-fly 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
 
         .glass-dark {
@@ -546,6 +626,9 @@ const Portfolio = () => {
         ::-webkit-scrollbar-thumb { background: #00E3C2; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #00b399; }
       `}</style>
+
+      {/* THEME ORB ANIMATION */}
+      <ThemeOrb isAnimating={isThemeAnimating} isDark={isDark} />
 
       {/* CONSTELLATION BACKGROUND */}
       <ConstellationBackground theme={theme} />
@@ -573,11 +656,12 @@ const Portfolio = () => {
               ))}
             </nav>
 
-            {/* Theme Toggle & CV (Moved to Header for Mobile too) */}
+            {/* Theme Toggle & CV */}
             <div className={`flex items-center gap-3 ${isDark ? '' : ''}`}>
               <button
                 onClick={toggleTheme}
-                className={`p-2 rounded-full transition-colors ${isDark ? 'bg-[#1A2634] text-yellow-400 hover:bg-[#253241]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+                disabled={isThemeAnimating}
+                className={`p-2 rounded-full transition-colors relative ${isDark ? 'bg-[#1A2634] text-yellow-400 hover:bg-[#253241]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
                 title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
@@ -592,7 +676,7 @@ const Portfolio = () => {
               </a>
             </div>
 
-            {/* Mobile Hamburger Menu (Hover-based) */}
+            {/* Mobile Hamburger Menu */}
             <div
               className="md:hidden relative"
               onMouseEnter={() => setIsMenuHovered(true)}
@@ -696,7 +780,13 @@ const Portfolio = () => {
               <div className="relative flex justify-center lg:justify-end order-1 lg:order-2">
                  <Reveal animation="scale-up" delay={200} className="relative z-10">
                     <div className={`relative w-[320px] h-[320px] sm:w-[450px] sm:h-[450px] rounded-full overflow-hidden border-2 ${isDark ? 'border-[#00E3C2]/30' : 'border-teal-600/30'} shadow-[0_0_30px_rgba(0,227,194,0.1)]`}>
-                      <img src="/profile.jpg" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/400x400/1A2634/00E3C2?text=EP"; }} alt="Elangovan P" className="w-full h-full object-cover" />
+                      <img
+                        src={isDark ? "/profile-dark.jpg" : "/profile-light.jpg"}
+                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/400x400/1A2634/00E3C2?text=EP"; }}
+                        alt="Elangovan P"
+                        key={isDark ? 'dark' : 'light'}
+                        className="w-full h-full object-cover transition-all duration-500 ease-in-out"
+                      />
                     </div>
 
                     <div className={`absolute top-12 -left-8 ${isDark ? 'bg-[#1A2634]/90' : 'bg-white/90'} backdrop-blur-md p-4 rounded-sm shadow-xl border-l-4 border-[#00E3C2] animate-float`}>
@@ -876,18 +966,14 @@ const Portfolio = () => {
                       <Reveal key={idx} delay={idx * 50} animation="scale-up">
                         <div
                           onClick={() => handleSkillClick(skill.name)}
-                          className={`${cardBg} ${isDark ? 'hover:bg-[#081F2F]' : 'hover:bg-slate-50'} p-6 rounded-sm border ${borderColor} hover:border-[#00E3C2]/50 transition-all cursor-pointer group flex flex-col items-center gap-4 text-center h-full hover:-translate-y-1 shadow-md hover:shadow-[0_0_15px_rgba(0,227,194,0.1)]`}
+                          className={`${cardBg} ${isDark ? 'hover:bg-[#081F2F]' : 'hover:bg-slate-50'} p-5 rounded-sm border ${borderColor} hover:border-[#00E3C2]/50 transition-all cursor-pointer group flex flex-col items-center justify-between text-center h-full hover:-translate-y-1 shadow-md hover:shadow-[0_0_15px_rgba(0,227,194,0.1)]`}
                         >
-                           <div className={`${muteColor} group-hover:text-[#00E3C2] transition-colors`}>
+                           <div className={`${muteColor} group-hover:text-[#00E3C2] transition-colors mb-3 mt-1`}>
                              {loadingSkill === skill.name ? <Loader2 className="animate-spin" size={32}/> : <Icon size={32} />}
                            </div>
-                           <div>
-                             <h4 className={`font-bold ${textColor} text-sm tracking-wide`}>{skill.name}</h4>
-                             <div className="flex gap-1 justify-center mt-3">
-                               {[...Array(5)].map((_, i) => (
-                                 <div key={i} className={`h-1 w-4 rounded-full transition-colors ${i < skill.rating ? 'bg-[#00E3C2]' : isDark ? 'bg-[#0B0F14]' : 'bg-slate-300'}`}></div>
-                               ))}
-                             </div>
+                           <div className="w-full">
+                             <h4 className={`font-bold ${textColor} text-sm tracking-wide mb-3`}>{skill.name}</h4>
+                             <SkillBar rating={skill.rating} isDark={isDark} />
                            </div>
                         </div>
                       </Reveal>
@@ -900,7 +986,10 @@ const Portfolio = () => {
         </section>
 
         {/* PROJECTS SECTION */}
-        <section id="projects" className={`py-20 md:py-32 ${isDark ? '' : 'bg-slate-50'} relative`}>
+        <section id="projects" className={`py-20 md:py-32 ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-50'} relative transition-colors duration-500`}>
+           {/* Subtle Divider Line for Separation */}
+           <div className={`absolute top-0 left-0 w-full h-px ${isDark ? 'bg-gradient-to-r from-transparent via-[#1A2634] to-transparent' : 'bg-gradient-to-r from-transparent via-slate-200 to-transparent'}`}></div>
+
            <div className="container mx-auto px-5 sm:px-7 max-w-[80rem]">
             <Reveal>
               <div className="flex items-center gap-4 mb-16">
@@ -910,56 +999,60 @@ const Portfolio = () => {
               </div>
             </Reveal>
 
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-10">
               {RESUME_DATA.projects.map((project, idx) => (
                 <Reveal key={idx} delay={idx * 150} animation="fade-up">
-                  <div className={`group flex flex-col h-full ${cardBg} border ${borderColor} rounded-sm overflow-hidden hover:border-[#00E3C2]/30 transition-all duration-300 hover:shadow-xl hover:shadow-[#00E3C2]/10`}>
-                    <div className={`relative h-48 ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-200'} overflow-hidden flex items-center justify-center border-b ${borderColor}`}>
-                       <div className={`${isDark ? 'text-[#C7D3DD]/50' : 'text-slate-400'} group-hover:text-[#00E3C2] group-hover:scale-110 transition-all duration-500 opacity-50 group-hover:opacity-100`}>
-                          {project.image === 'shield' && <Shield size={80} strokeWidth={1} />}
-                          {project.image === 'terminal' && <Terminal size={80} strokeWidth={1} />}
-                          {project.image === 'bot' && <Bot size={80} strokeWidth={1} />}
-                          {project.image === 'cpu' && <Cpu size={80} strokeWidth={1} />}
-                       </div>
+                  <div className={`group flex flex-col h-full ${cardBg} border ${borderColor} rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1`}>
+                    {/* Image Area with Inner Padding & Subtle Border */}
+                    <div className="p-3 pb-0">
+                      <div className={`relative aspect-video rounded-t-lg overflow-hidden border ${isDark ? 'border-[#1A2634] bg-[#0B0F14]' : 'border-slate-100 bg-slate-100'}`}>
+                         <div className={`w-full h-full flex items-center justify-center ${isDark ? 'text-[#C7D3DD]/30' : 'text-slate-300'} group-hover:scale-105 transition-transform duration-700 ease-out`}>
+                            {project.image === 'shield' && <Shield size={64} strokeWidth={1} />}
+                            {project.image === 'terminal' && <Terminal size={64} strokeWidth={1} />}
+                            {project.image === 'bot' && <Bot size={64} strokeWidth={1} />}
+                            {project.image === 'cpu' && <Cpu size={64} strokeWidth={1} />}
+                         </div>
 
-                       <div className={`absolute inset-0 ${isDark ? 'bg-[#0B0F14]/80' : 'bg-white/80'} opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm`}>
-                          <button className={`px-6 py-2 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} rounded-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2 shadow-lg`}>
-                            View Details <ArrowRight size={16}/>
-                          </button>
-                       </div>
+                         {/* Subtle Overlay on Hover */}
+                         <div className={`absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center`}>
+                            <button className={`opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 px-5 py-2.5 bg-[#00E3C2] text-[#0B0F14] rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transform`}>
+                              View Project <ArrowRight size={16}/>
+                            </button>
+                         </div>
+                      </div>
                     </div>
 
-                    <div className="p-6 flex-1 flex flex-col">
-                       <div className="flex justify-between items-start mb-4">
+                    <div className="p-6 pt-5 flex-1 flex flex-col">
+                       <div className="flex justify-between items-start mb-3 gap-4">
                           <div>
-                             <h3 className={`text-xl font-bold ${textColor} group-hover:text-[#00E3C2] transition-colors`}>{project.title}</h3>
-                             <p className="text-xs font-bold text-[#00E3C2]/80 uppercase tracking-wider">{project.client}</p>
+                             <p className="text-xs font-bold text-[#00E3C2] uppercase tracking-wider mb-1">{project.client}</p>
+                             <h3 className={`text-2xl font-bold ${textColor} group-hover:text-[#00E3C2] transition-colors leading-tight`}>{project.title}</h3>
                           </div>
 
                           <button
                             onClick={(e) => {e.preventDefault(); handleProjectScan(idx, project)}}
                             disabled={loadingProject === idx}
-                            className={`p-2 rounded-sm ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-100'} border ${borderColor} hover:border-[#00E3C2] text-[#00E3C2] transition-colors`}
+                            className={`p-2.5 rounded-lg ${isDark ? 'bg-[#0B0F14] hover:bg-[#1A2634]' : 'bg-slate-50 hover:bg-white'} border ${borderColor} text-[#00E3C2] transition-all hover:scale-105 shadow-sm`}
                             title="AI Analysis"
                           >
                             {loadingProject === idx ? <Loader2 size={18} className="animate-spin"/> : <ScanEye size={18}/>}
                           </button>
                        </div>
 
-                       <p className={`${muteColor} text-sm mb-6 flex-1 opacity-80`}>{project.desc}</p>
+                       <p className={`${muteColor} text-sm leading-relaxed mb-6 flex-1 opacity-90`}>{project.desc}</p>
 
-                       <div className="flex flex-wrap gap-2 mb-4">
+                       <div className="flex flex-wrap gap-2 mb-2">
                           {project.tags.map(tag => (
-                            <span key={tag} className={`px-3 py-1 ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-100'} border ${borderColor} ${muteColor} text-xs rounded-full group-hover:border-[#00E3C2]/30 transition-colors`}>{tag}</span>
+                            <span key={tag} className={`px-3 py-1.5 ${isDark ? 'bg-[#0B0F14]' : 'bg-slate-100'} border ${borderColor} ${muteColor} text-xs font-medium rounded-lg group-hover:border-[#00E3C2]/30 transition-colors`}>{tag}</span>
                           ))}
                        </div>
 
                        {projectInsights[idx] && (
-                          <div className={`mt-auto p-4 bg-[#00E3C2]/10 ${muteColor} rounded-sm text-sm border border-[#00E3C2]/30 animate-in fade-in`}>
-                             <div className="flex items-center gap-2 font-bold text-[#00E3C2] text-xs uppercase mb-1">
+                          <div className={`mt-5 p-4 bg-[#00E3C2]/5 ${muteColor} rounded-lg text-sm border border-[#00E3C2]/20 animate-in fade-in slide-in-from-bottom-2`}>
+                             <div className="flex items-center gap-2 font-bold text-[#00E3C2] text-xs uppercase mb-2">
                                <Bot size={14} /> AI Analysis
                              </div>
-                             {projectInsights[idx]}
+                             <p className="leading-relaxed">{projectInsights[idx]}</p>
                           </div>
                         )}
                     </div>
@@ -983,57 +1076,57 @@ const Portfolio = () => {
             <div className={`max-w-4xl mx-auto grid md:grid-cols-5 gap-0 ${cardBg} rounded-sm overflow-hidden shadow-2xl border ${borderColor}`}>
 
               {/* Contact Info Sidebar */}
-              <div className={`md:col-span-2 ${isDark ? 'bg-[#081F2F]' : 'bg-slate-800'} p-8 text-white flex flex-col justify-between border-r ${borderColor}`}>
+              <div className={`md:col-span-2 ${isDark ? 'bg-[#081F2F] border-r border-[#1A2634]' : 'bg-slate-100 border-r border-slate-200'} p-6 md:p-8 flex flex-col justify-between transition-colors duration-500`}>
                  <div>
                    <h3 className="text-xl font-bold mb-6 text-[#00E3C2]">Contact Information</h3>
-                   <p className="text-slate-300 mb-8 text-sm opacity-80">Open to full-time opportunities and freelance projects. Let's build something secure.</p>
+                   <p className={`${isDark ? 'text-slate-300' : 'text-slate-600'} mb-8 text-sm opacity-80 leading-relaxed transition-colors duration-500`}>Open to full-time opportunities and freelance projects. Let's build something secure.</p>
 
                    <div className="space-y-6">
                      <div className="flex items-start gap-4 group">
                        <Mail className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm break-all text-slate-300">{RESUME_DATA.email}</div>
+                       <div className={`text-sm break-all ${isDark ? 'text-slate-300' : 'text-slate-600'} transition-colors duration-500`}>{RESUME_DATA.email}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <Phone className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-slate-300">{RESUME_DATA.phone}</div>
+                       <div className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'} transition-colors duration-500`}>{RESUME_DATA.phone}</div>
                      </div>
                      <div className="flex items-start gap-4 group">
                        <MapPin className="shrink-0 text-[#00E3C2] group-hover:scale-110 transition-transform" size={20}/>
-                       <div className="text-sm text-slate-300">{RESUME_DATA.location}</div>
+                       <div className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'} transition-colors duration-500`}>{RESUME_DATA.location}</div>
                      </div>
                    </div>
                  </div>
 
                  <div className="flex gap-4 mt-8">
-                    <a href="https://www.linkedin.com/in/elangovan4641477/" target="_blank" rel="noreferrer" className={`p-2 ${isDark ? 'bg-[#1A2634]' : 'bg-slate-700'} rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors`}><Linkedin size={18}/></a>
-                    <a href="https://github.com/Jarvis2024-hub" target="_blank" rel="noreferrer" className={`p-2 ${isDark ? 'bg-[#1A2634]' : 'bg-slate-700'} rounded-full hover:bg-[#00E3C2] hover:text-[#0B0F14] text-slate-300 transition-colors`}><Github size={18}/></a>
+                    <a href="https://www.linkedin.com/in/elangovan4641477/" target="_blank" rel="noreferrer" className={`p-2 ${isDark ? 'bg-[#1A2634] text-slate-300 hover:text-[#0B0F14]' : 'bg-white text-slate-600 hover:text-white shadow-sm border border-slate-200'} rounded-full hover:bg-[#00E3C2] transition-all duration-300`}><Linkedin size={18}/></a>
+                    <a href="https://github.com/Jarvis2024-hub" target="_blank" rel="noreferrer" className={`p-2 ${isDark ? 'bg-[#1A2634] text-slate-300 hover:text-[#0B0F14]' : 'bg-white text-slate-600 hover:text-white shadow-sm border border-slate-200'} rounded-full hover:bg-[#00E3C2] transition-all duration-300`}><Github size={18}/></a>
                  </div>
               </div>
 
               {/* Form */}
-              <div className="md:col-span-3 p-8 lg:p-12">
+              <div className="md:col-span-3 p-5 md:p-8 lg:p-12">
 
                 {/* AI Feature */}
                 <div className={`mb-8 p-4 ${inputBg} rounded-sm border ${borderColor}`}>
                    <div className="flex items-center justify-between mb-3">
                      <span className="text-xs font-bold text-[#00E3C2] uppercase flex items-center gap-1"><Zap size={14}/> For Recruiters</span>
                    </div>
-                   <div className="flex gap-2">
+                   <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="text" placeholder="Company Name"
-                        className={`flex-1 p-2 text-sm ${inputBg} border ${inputBorder} rounded-sm ${textColor} focus:outline-none focus:border-[#00E3C2]`}
+                        className={`flex-1 p-2 text-sm ${inputBg} border ${inputBorder} rounded-sm ${textColor} focus:outline-none focus:border-[#00E3C2] w-full`}
                         value={draftContext.company}
                         onChange={(e) => setDraftContext({...draftContext, company: e.target.value})}
                       />
                       <input
                         type="text" placeholder="Role"
-                        className={`flex-1 p-2 text-sm ${inputBg} border ${inputBorder} rounded-sm ${textColor} focus:outline-none focus:border-[#00E3C2]`}
+                        className={`flex-1 p-2 text-sm ${inputBg} border ${inputBorder} rounded-sm ${textColor} focus:outline-none focus:border-[#00E3C2] w-full`}
                         value={draftContext.role}
                         onChange={(e) => setDraftContext({...draftContext, role: e.target.value})}
                       />
                       <button
                         onClick={handleMagicDraft} disabled={isDrafting}
-                        className={`px-4 py-2 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} text-xs font-bold rounded-sm hover:bg-[#00c4a7] transition-colors flex items-center gap-2`}
+                        className={`px-4 py-2 bg-[#00E3C2] ${isDark ? 'text-[#0B0F14]' : 'text-white'} text-xs font-bold rounded-sm hover:bg-[#00c4a7] transition-colors flex items-center justify-center gap-2 w-full sm:w-auto`}
                       >
                          {isDrafting ? <Loader2 size={14} className="animate-spin"/> : <Sparkles size={14}/>}
                          <span>Magic Draft</span>
@@ -1053,7 +1146,7 @@ const Portfolio = () => {
                    </div>
                 ) : (
                   <form onSubmit={handleContactSubmit} className="space-y-6">
-                     <div className="grid grid-cols-2 gap-4">
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className={`text-xs font-bold ${muteColor} uppercase mb-1 block`}>Name</label>
                           <input
